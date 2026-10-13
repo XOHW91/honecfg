@@ -1,0 +1,999 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>우리과 맛집 수첩</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nanum+Pen+Script&family=Gowun+Dodum&family=Nanum+Gothic+Coding:wght@400;700&display=swap">
+<style>
+/* 수첩(줄노트) 위에 영수증을 테이프로 붙인 한 장짜리 모바일 앱. 종이 느낌 하나로만 가는 단일 테마. */
+:root {
+  --desk: #e9dcc0;
+  --paper: #f6efdf;
+  --paper-line: #e4d9c2;
+  --margin-line: #e7b4a6;
+  --receipt: #fffdf7;
+  --ink: #2b2620;
+  --ink-soft: #5f574c;
+  --ink-faint: #857a6c;
+  --rule: #b9ad96;
+  --accent: #b5432d;
+  --accent-ink: #fffdf7;
+  --danger: #8a2e1c;
+  --cover: #8f5d34;
+  --cover-dark: #6e4524;
+  --tape-1: rgba(233, 212, 138, .88);
+  --tape-2: rgba(169, 203, 183, .88);
+  --tape-3: rgba(231, 180, 166, .88);
+  --tag-1: #f9e7a8;
+  --tag-2: #cfe3d6;
+  --tag-3: #f4cdbf;
+  --tag-4: #d9d4ee;
+  --shadow: rgba(43, 38, 32, .14);
+  --f-hand: 'Nanum Pen Script', 'Gaegu', cursive;
+  --f-body: 'Gowun Dodum', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif;
+  --f-mono: 'Nanum Gothic Coding', 'D2Coding', ui-monospace, monospace;
+  color-scheme: light;
+}
+* { box-sizing: border-box; }
+html, body { height: 100%; }
+body { margin: 0; background: var(--desk); color: var(--ink); font-family: var(--f-body); font-size: 15px; -webkit-tap-highlight-color: transparent; }
+button, input, textarea, select { font: inherit; color: inherit; }
+button { cursor: pointer; }
+a { color: inherit; text-decoration: none; }
+:focus-visible { outline: 2.5px solid var(--accent); outline-offset: 2px; }
+[hidden] { display: none !important; }
+
+.app { max-width: 480px; min-height: 100%; margin: 0 auto; position: relative; background: var(--paper); box-shadow: 0 0 40px var(--shadow); }
+.paper { min-height: 100vh; min-height: 100dvh; position: relative; padding-bottom: 120px;
+  background-color: var(--paper);
+  background-image: repeating-linear-gradient(to bottom, transparent 0, transparent 31px, var(--paper-line) 31px, var(--paper-line) 32px); }
+.paper.margin::before { content: ""; position: absolute; left: 34px; top: 0; bottom: 0; width: 2px; background: var(--margin-line); pointer-events: none; }
+
+.hand { font-family: var(--f-hand); font-weight: 400; }
+.mono { font-family: var(--f-mono); }
+.muted { color: var(--ink-soft); }
+.icon-btn { width: 44px; height: 44px; border: none; background: transparent; display: inline-flex; align-items: center; justify-content: center; border-radius: 22px; }
+.text-btn { min-height: 40px; padding: 0 12px; border: none; background: transparent; font-size: 14px; border-radius: 8px; }
+.text-btn.danger { color: var(--danger); }
+
+/* ---------- 입장 ---------- */
+.entry { min-height: 100vh; min-height: 100dvh; display: flex; align-items: center; justify-content: center; padding: 24px 16px; background: var(--desk); }
+.cover { position: relative; width: 100%; max-width: 330px; background: var(--cover); border-radius: 6px 18px 18px 6px; box-shadow: 0 14px 30px rgba(43,38,32,.3); padding: 56px 26px 34px 40px; color: var(--accent-ink); }
+.cover::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 18px; background: var(--cover-dark); border-radius: 6px 0 0 6px; }
+.cover::after { content: ""; position: absolute; right: -6px; top: 120px; width: 14px; height: 110px; background: var(--accent); border-radius: 0 4px 4px 0; }
+.label { position: relative; background: var(--receipt); color: var(--ink); padding: 18px 14px; transform: rotate(-1.5deg); box-shadow: 0 2px 4px var(--shadow); text-align: center; }
+.label h1 { margin: 0; font-size: 44px; line-height: 1; text-wrap: balance; }
+.label p { margin: 8px 0 0; font-size: 12px; color: var(--ink-soft); }
+.tape { position: absolute; height: 20px; width: 68px; background: var(--tape-1); z-index: 2; }
+.entry form { margin-top: 40px; display: flex; flex-direction: column; gap: 14px; }
+.entry label { display: block; font-size: 13px; margin-bottom: 6px; }
+.field { width: 100%; height: 50px; padding: 0 14px; border: none; border-radius: 10px; background: var(--receipt); color: var(--ink); font-size: 16px; }
+.btn-dark { height: 54px; border: none; border-radius: 27px; background: var(--ink); color: var(--accent-ink); font-size: 16px; display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; }
+.entry .hint { margin: 2px 0 0; font-size: 12px; text-align: center; line-height: 1.5; }
+.entry .err { margin: 0; font-size: 13px; background: var(--receipt); color: var(--danger); padding: 8px 10px; border-radius: 8px; }
+.demo-note { margin-top: 18px; font-size: 12px; line-height: 1.6; background: rgba(255,253,247,.16); border: 1px dashed rgba(255,253,247,.6); border-radius: 8px; padding: 8px 10px; }
+
+/* ---------- 홈 ---------- */
+.home-head { display: flex; justify-content: space-between; align-items: flex-start; padding: 26px 12px 6px 52px; }
+.home-head > div { min-width: 0; }
+.home-head h1 { margin: 0; font-size: clamp(34px, 10vw, 42px); line-height: 1; white-space: nowrap; }
+.home-head p { margin: 6px 0 0; font-size: 13px; color: var(--ink-soft); }
+.seg { display: flex; margin: 10px 16px 0 52px; border: 1.5px solid var(--ink); border-radius: 10px; overflow: hidden; background: var(--receipt); }
+.seg button { flex: 1; height: 40px; border: none; background: transparent; display: flex; align-items: center; justify-content: center; gap: 6px; font-size: 15px; }
+.seg button[aria-pressed="true"] { background: var(--ink); color: var(--accent-ink); }
+.chips { display: flex; gap: 8px; padding: 16px 16px 8px 52px; overflow-x: auto; scrollbar-width: none; }
+.chips::-webkit-scrollbar { display: none; }
+.chip { flex: none; min-height: 36px; padding: 0 14px; border: 1.5px dashed var(--ink); border-radius: 18px; font-size: 14px; color: var(--ink); box-shadow: 1px 2px 0 rgba(43,38,32,.12); }
+.chip[aria-pressed="true"] { background: var(--accent) !important; color: var(--accent-ink); border-style: solid; border-color: var(--accent); }
+.bar { display: flex; justify-content: space-between; align-items: center; gap: 8px; padding: 6px 16px 4px 52px; }
+.bar .count { font-size: 22px; }
+.sort { position: relative; }
+.sort select { appearance: none; -webkit-appearance: none; border: none; background: transparent; font-size: 14px; padding: 8px 22px 8px 8px; min-height: 40px; }
+.sort svg { position: absolute; right: 4px; top: 50%; margin-top: -7px; pointer-events: none; }
+
+.list { display: flex; flex-direction: column; gap: 28px; padding: 18px 18px 0 54px; }
+.card { display: block; position: relative; }
+.card .tape { top: -11px; }
+.slip { background: var(--receipt); padding: 18px 18px 14px; box-shadow: 0 3px 8px var(--shadow); }
+.slip-top { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; }
+.slip-top strong { font-family: var(--f-mono); font-size: 17px; min-width: 0; overflow-wrap: anywhere; }
+.slip-top .score { font-family: var(--f-mono); font-weight: 700; font-size: 16px; color: var(--accent); white-space: nowrap; }
+.slip-top .wish { font-size: 13px; color: var(--ink-soft); white-space: nowrap; }
+.slip-meta { font-family: var(--f-mono); font-size: 12px; color: var(--ink-soft); margin-top: 4px; line-height: 1.5; }
+.dash { border: none; border-top: 1.5px dashed var(--rule); margin: 10px 0; }
+.slip-note { margin: 0; font-size: 14px; line-height: 1.55; overflow-wrap: anywhere; }
+.zig-b { height: 9px; background: linear-gradient(135deg, var(--receipt) 4.5px, transparent 0) 0 0/12px 9px repeat-x, linear-gradient(-135deg, var(--receipt) 4.5px, transparent 0) 0 0/12px 9px repeat-x; }
+.zig-t { height: 9px; background: linear-gradient(45deg, var(--receipt) 4.5px, transparent 0) 0 100%/12px 9px repeat-x, linear-gradient(-45deg, var(--receipt) 4.5px, transparent 0) 0 100%/12px 9px repeat-x; }
+.empty { margin: 30px 18px 0 54px; padding: 22px 18px; border: 1.5px dashed var(--rule); border-radius: 12px; text-align: center; line-height: 1.7; color: var(--ink-soft); }
+.empty .hand { font-size: 26px; color: var(--ink); display: block; }
+
+.mapbox { margin: 14px 16px 0 52px; height: 62vh; min-height: 360px; border: 1.5px solid var(--ink); border-radius: 12px; overflow: hidden; background: var(--receipt); position: relative; }
+.mapbox .ph { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; padding: 24px; text-align: center; color: var(--ink-soft); line-height: 1.6; font-size: 14px; }
+.pin { display: inline-flex; align-items: center; gap: 4px; padding: 6px 10px; background: var(--receipt); border: 1.5px solid var(--ink); border-radius: 14px; font-family: var(--f-body); font-size: 13px; color: var(--ink); white-space: nowrap; box-shadow: 0 2px 4px var(--shadow); transform: translateY(-6px); }
+.pin b { color: var(--accent); font-family: var(--f-mono); }
+
+.fab { position: fixed; z-index: 20; bottom: calc(24px + env(safe-area-inset-bottom, 0px)); right: max(16px, calc(50% - 240px + 16px)); height: 56px; padding: 0 22px 0 18px; border-radius: 28px; background: var(--accent); color: var(--accent-ink); display: flex; align-items: center; gap: 8px; font-size: 16px; box-shadow: 0 6px 14px rgba(43,38,32,.28); }
+
+/* ---------- 상세 (영수증) ---------- */
+.top { display: flex; justify-content: space-between; align-items: center; padding: 14px 8px 4px; }
+.receipt-wrap { margin: 8px 18px 0; filter: drop-shadow(0 4px 8px var(--shadow)); }
+.receipt { background: var(--receipt); padding: 22px 20px 18px; font-family: var(--f-mono); font-size: 14px; position: relative; }
+.receipt .head { text-align: center; font-size: 12px; letter-spacing: 2px; color: var(--ink-soft); margin: 0; }
+.receipt h1 { margin: 14px 0 4px; text-align: center; font-size: 23px; line-height: 1.3; text-wrap: balance; overflow-wrap: anywhere; }
+.receipt .sub { margin: 2px 0 0; text-align: center; font-size: 12px; color: var(--ink-soft); }
+.rows { display: flex; flex-direction: column; gap: 8px; }
+.row { display: flex; justify-content: space-between; gap: 12px; }
+.row span:last-child { text-align: right; min-width: 0; overflow-wrap: anywhere; }
+.row.big { font-size: 18px; font-weight: 700; }
+.row.big span:last-child { color: var(--accent); }
+.quote { margin: 12px 0 0; font-family: var(--f-body); font-size: 15px; line-height: 1.6; overflow-wrap: anywhere; }
+.stamp { position: absolute; right: 6px; top: -4px; width: 66px; height: 66px; border: 3px solid var(--accent); border-radius: 50%; color: var(--accent); display: flex; flex-direction: column; align-items: center; justify-content: center; transform: rotate(-14deg); opacity: .82; font-family: var(--f-hand); font-size: 21px; line-height: 1; pointer-events: none; background: rgba(255,253,247,.6); }
+.receipt h1 { padding: 0 34px; }
+.voices { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 14px; }
+.voices li { display: flex; flex-direction: column; gap: 3px; }
+.voices .who { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+.voices .who em { font-style: normal; font-size: 11px; padding: 1px 6px; border-radius: 8px; background: var(--tag-1); margin-left: 4px; }
+.voices .txt { font-family: var(--f-body); font-size: 14px; color: var(--ink-soft); line-height: 1.55; overflow-wrap: anywhere; }
+.voices .tiny { min-height: 32px; padding: 0 6px; border: none; background: transparent; font-size: 12px; color: var(--danger); }
+.links { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+.links a { min-height: 58px; border: 1.5px solid var(--ink); border-radius: 8px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; font-size: 12px; text-align: center; padding: 4px; }
+.links a:hover { background: var(--paper); }
+.barcode { height: 46px; margin: 20px 8px 6px; background: repeating-linear-gradient(90deg, var(--ink) 0 2px, transparent 2px 4px, var(--ink) 4px 5px, transparent 5px 8px, var(--ink) 8px 11px, transparent 11px 12px, var(--ink) 12px 13px, transparent 13px 17px); }
+.bottom-bar { position: fixed; z-index: 20; left: 0; right: 0; bottom: 0; max-width: 480px; margin: 0 auto; padding: 14px 16px calc(22px + env(safe-area-inset-bottom, 0px)); background: linear-gradient(to top, var(--paper) 72%, rgba(246,239,223,0)); }
+.btn-accent { width: 100%; height: 54px; border: none; border-radius: 27px; background: var(--accent); color: var(--accent-ink); font-size: 16px; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 6px 14px rgba(43,38,32,.25); }
+.btn-accent[disabled] { opacity: .6; }
+
+/* ---------- 등록 ---------- */
+.form-head { display: flex; align-items: center; gap: 2px; padding: 14px 8px 0; }
+.form-head h1 { margin: 0; font-size: 34px; }
+.sec { padding: 18px 16px 0; }
+.sec > .lbl, .sec label.lbl { display: block; font-size: 13px; color: var(--ink-soft); margin-bottom: 8px; }
+.searchbox { display: flex; align-items: center; gap: 8px; height: 50px; padding: 0 6px 0 14px; background: var(--receipt); border: 1.5px solid var(--ink); border-radius: 12px; }
+.searchbox input { flex: 1; min-width: 0; border: none; outline: none; background: transparent; font-size: 16px; }
+.searchbox button { height: 38px; padding: 0 14px; border: none; border-radius: 19px; background: var(--ink); color: var(--accent-ink); font-size: 14px; }
+.results { list-style: none; margin: 10px 0 0; padding: 0; background: var(--receipt); border-radius: 12px; box-shadow: 0 3px 8px var(--shadow); overflow: hidden; }
+.results li + li { border-top: 1px solid #ece3d1; }
+.results .item { width: 100%; text-align: left; border: none; background: transparent; padding: 13px 14px; display: flex; justify-content: space-between; align-items: center; gap: 10px; min-height: 60px; }
+.results .item[aria-pressed="true"] { background: var(--tag-1); }
+.results .nm { font-size: 15px; font-weight: 700; display: block; }
+.results .ad { font-size: 12px; color: var(--ink-soft); display: block; margin-top: 2px; }
+.results .dup { flex: none; font-size: 12px; padding: 6px 10px; border-radius: 14px; border: 1.5px dashed var(--accent); color: var(--accent); white-space: nowrap; }
+.picked { background: var(--receipt); border-radius: 12px; padding: 14px; box-shadow: 0 3px 8px var(--shadow); }
+.picked strong { font-size: 17px; }
+.tagpick { display: flex; flex-wrap: wrap; gap: 8px; }
+.tagpick .chip { border-color: var(--rule); color: var(--ink-soft); box-shadow: none; background: transparent; }
+.tagpick .chip[aria-pressed="true"] { border: 1.5px solid var(--ink) !important; color: var(--ink); background: var(--tag-1) !important; }
+.line-input { width: 100%; height: 48px; padding: 0 4px; border: none; border-bottom: 1.5px solid var(--ink); background: transparent; font-family: var(--f-hand); font-size: 25px; outline: none; }
+.box-input { width: 100%; padding: 10px 14px; border: 1.5px solid var(--ink); border-radius: 12px; background: var(--receipt); font-size: 15px; line-height: 1.5; resize: none; }
+.counter { font-size: 12px; color: var(--ink-faint); text-align: right; margin-top: 4px; font-variant-numeric: tabular-nums; }
+.stars { display: flex; gap: 2px; }
+.stars button { width: 48px; height: 48px; border: none; background: transparent; font-size: 34px; line-height: 1; color: var(--rule); padding: 0; }
+.stars button.on { color: var(--accent); }
+.toggle2 { display: flex; gap: 8px; }
+.toggle2 button { flex: 1; height: 46px; border: 1.5px solid var(--ink); border-radius: 10px; background: transparent; font-size: 14px; }
+.toggle2 button[aria-pressed="true"] { background: var(--ink); color: var(--accent-ink); }
+
+/* ---------- 시트 / 토스트 / 도장 ---------- */
+.backdrop { position: fixed; inset: 0; z-index: 40; background: rgba(43,38,32,.4); }
+.sheet { position: fixed; z-index: 41; left: 0; right: 0; bottom: 0; max-width: 480px; margin: 0 auto; max-height: 88vh; overflow-y: auto; background: var(--receipt); border-radius: 18px 18px 0 0; padding: 10px 18px calc(24px + env(safe-area-inset-bottom, 0px)); box-shadow: 0 -8px 24px var(--shadow); }
+.sheet .grab { width: 40px; height: 4px; border-radius: 2px; background: var(--rule); margin: 0 auto 10px; }
+.sheet h2 { margin: 4px 0 4px; font-size: 30px; }
+.sheet .sub { margin: 0 0 14px; font-size: 13px; color: var(--ink-soft); }
+.sheet .group { padding: 14px 0; border-top: 1.5px dashed var(--rule); display: flex; flex-direction: column; gap: 10px; }
+.sheet .group:first-of-type { border-top: none; }
+.sheet .inline { display: flex; gap: 8px; }
+.sheet .inline .box-input { height: 46px; padding: 0 12px; }
+.sheet .small-btn { flex: none; height: 46px; padding: 0 16px; border: none; border-radius: 10px; background: var(--ink); color: var(--accent-ink); font-size: 14px; }
+.sheet .note { font-size: 12px; color: var(--ink-soft); line-height: 1.6; margin: 0; }
+.sheet .badge { align-self: flex-start; font-size: 12px; padding: 3px 10px; border-radius: 10px; background: var(--tag-2); }
+.sheet .actions { display: flex; gap: 8px; margin-top: 8px; }
+.sheet .actions > * { flex: 1; }
+.btn-line { height: 50px; border: 1.5px solid var(--ink); border-radius: 25px; background: transparent; font-size: 15px; }
+.btn-line.danger { border-color: var(--danger); color: var(--danger); }
+.toast { position: fixed; z-index: 60; left: 50%; bottom: calc(96px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); max-width: min(92vw, 440px); background: var(--ink); color: var(--accent-ink); padding: 11px 16px; border-radius: 12px; font-size: 14px; line-height: 1.5; box-shadow: 0 6px 16px var(--shadow); }
+.stamp-fx { position: fixed; z-index: 70; inset: 0; display: flex; align-items: center; justify-content: center; pointer-events: none; }
+.stamp-fx div { width: 150px; height: 150px; border: 6px solid var(--accent); border-radius: 50%; color: var(--accent); display: flex; flex-direction: column; align-items: center; justify-content: center; font-family: var(--f-hand); font-size: 44px; line-height: 1; background: rgba(255,253,247,.9); animation: slam .9s ease-out forwards; }
+@keyframes slam { 0% { transform: scale(2.2) rotate(-4deg); opacity: 0; } 30% { transform: scale(.95) rotate(-14deg); opacity: 1; } 40% { transform: scale(1) rotate(-14deg); } 80% { opacity: 1; } 100% { transform: scale(1) rotate(-14deg); opacity: 0; } }
+@media (prefers-reduced-motion: reduce) { .stamp-fx div { animation: none; opacity: 0; } }
+.loading { min-height: 100vh; display: flex; align-items: center; justify-content: center; font-family: var(--f-hand); font-size: 30px; color: var(--ink-soft); }
+</style>
+</head>
+<body>
+<div class="app" id="app">
+  <div class="loading" id="v-loading">수첩 펼치는 중…</div>
+
+  <section class="entry" id="v-entry" hidden>
+    <div class="cover">
+      <div class="label">
+        <span class="tape" style="top:-10px;left:50%;margin-left:-34px;transform:rotate(-3deg)" aria-hidden="true"></span>
+        <h1 class="hand">우리과 맛집 수첩</h1>
+        <p class="mono">우리끼리만 보는 점심 기록장</p>
+      </div>
+      <form id="entry-form" autocomplete="off">
+        <p class="err" id="entry-err" hidden></p>
+        <div>
+          <label for="in-code">그룹 코드</label>
+          <input class="field" id="in-code" type="password" placeholder="부서에서 받은 코드" required>
+        </div>
+        <div>
+          <label for="in-nick">닉네임</label>
+          <input class="field" id="in-nick" maxlength="12" placeholder="동료들에게 보일 이름" required>
+        </div>
+        <button class="btn-dark" type="submit" id="entry-btn">수첩 펼치기
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+        </button>
+        <p class="hint">한 번 입력하면 이 기기에서 계속 기억해요</p>
+      </form>
+      <p class="demo-note" id="demo-note" hidden>체험 모드예요. 그룹 코드 <b>demo</b>, 관리자 코드 <b>admin</b>으로 둘러볼 수 있어요. 입력한 내용은 이 브라우저에만 저장돼요.</p>
+    </div>
+  </section>
+
+  <section class="paper margin" id="v-home" hidden>
+    <header class="home-head">
+      <div>
+        <h1 class="hand">우리과 맛집 수첩</h1>
+        <p id="home-sub"></p>
+      </div>
+      <button class="icon-btn" data-act="settings" aria-label="설정">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M4.9 19.1L7 17M17 7l2.1-2.1"/></svg>
+      </button>
+    </header>
+    <div class="seg" role="group" aria-label="보기 방식">
+      <button data-act="view" data-v="list" aria-pressed="true">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>리스트</button>
+      <button data-act="view" data-v="map" aria-pressed="false">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 4L3 6v14l6-2 6 2 6-2V4l-6 2-6-2zM9 4v14M15 6v14"/></svg>지도</button>
+    </div>
+    <div class="chips" id="chips" role="group" aria-label="태그 필터"></div>
+    <div class="bar">
+      <span class="count hand" id="count"></span>
+      <div class="sort">
+        <label for="sort-sel" class="sr" hidden>정렬</label>
+        <select id="sort-sel" aria-label="정렬">
+          <option value="recent">최신순</option>
+          <option value="rating">별점순</option>
+          <option value="distance">거리순</option>
+        </select>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+      </div>
+    </div>
+    <div class="list" id="list"></div>
+    <div class="mapbox" id="mapbox" hidden><div class="ph" id="map-ph"></div><div id="map" style="position:absolute;inset:0"></div></div>
+    <a class="fab" href="#/new">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>맛집 붙이기</a>
+  </section>
+
+  <section class="paper" id="v-detail" hidden></section>
+  <section class="paper" id="v-form" hidden></section>
+</div>
+
+<div class="backdrop" id="backdrop" hidden data-act="sheet-close"></div>
+<div class="sheet" id="sheet" role="dialog" aria-modal="true" hidden></div>
+<div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+<div class="stamp-fx" id="stamp-fx" hidden><div><span>도장</span><span>꾹!</span></div></div>
+
+<script>
+/* =========================================================
+   설정 — 배포 전에 이 부분만 채우면 돼요 (README 참고)
+   firebase.apiKey 가 비어 있으면 '체험 모드'로 동작합니다.
+   ========================================================= */
+const CONFIG = {
+  firebase: {
+    apiKey: "AIzaSyAruVmXAf4aF3BsLIGYnjjrMkb0sSMhga8",
+    authDomain: "honecfg.firebaseapp.com",
+    databaseURL: "https://honecfg-default-rtdb.asia-southeast1.firebasedatabase.app",
+    projectId: "honecfg",
+    appId: "1:169135796615:web:681f217e40ed364ebf6322"
+  },
+  kakaoJsKey: "4b51eb85b34c0b0a975c5705e199231b",                                    // 카카오 JavaScript 키 (지도 + 장소검색)
+  center: { lat: 37.3801, lng: 126.8029, label: "시흥시청" }, // 검색·거리 기준점
+  searchRadius: 20000                                  // 장소검색 반경(m), 최대 20000
+};
+
+const TAGS = ['한식', '중식', '일식', '양식', '분식', '카페', '혼밥', '회식', '가성비', '웨이팅'];
+const TAG_BG = ['var(--tag-1)', 'var(--tag-2)', 'var(--tag-3)', 'var(--tag-4)'];
+const TAPES = ['var(--tape-1)', 'var(--tape-2)', 'var(--tape-3)'];
+const DEMO = !CONFIG.firebase.apiKey;
+
+/* ---------- 작은 도구들 ---------- */
+const $ = (s, r = document) => r.querySelector(s);
+const esc = (v) => String(v ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const ls = {
+  get(k) { try { return JSON.parse(localStorage.getItem(k)); } catch (e) { return null; } },
+  set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} },
+  del(k) { try { localStorage.removeItem(k); } catch (e) {} }
+};
+const isDenied = (e) => !!e && (e.code === 'PERMISSION_DENIED' || /permission/i.test(e.message || ''));
+function fmtDate(t) {
+  const d = new Date(t); const p = (n) => String(n).padStart(2, '0');
+  return `${d.getFullYear()}.${p(d.getMonth() + 1)}.${p(d.getDate())} ${p(d.getHours())}:${p(d.getMinutes())}`;
+}
+function distKm(a, b) {
+  const R = 6371, r = (x) => x * Math.PI / 180;
+  const dLat = r(b.lat - a.lat), dLng = r(b.lng - a.lng);
+  const h = Math.sin(dLat / 2) ** 2 + Math.cos(r(a.lat)) * Math.cos(r(b.lat)) * Math.sin(dLng / 2) ** 2;
+  return 2 * R * Math.asin(Math.sqrt(h));
+}
+const fmtDist = (km) => km < 1 ? `${Math.round(km * 1000 / 10) * 10}m` : `${km.toFixed(1)}km`;
+function region(addr, depth) { const t = String(addr || '').split(/\s+/); return t.slice(1, 1 + depth).join(' '); }
+function naverMapUrl(p) { return 'https://map.naver.com/p/search/' + encodeURIComponent(`${p.name} ${region(p.address, 2)}`.trim()); }
+function naverBlogUrl(p) { return 'https://search.naver.com/search.naver?where=blog&query=' + encodeURIComponent(`${region(p.address, 1)} ${p.name}`.trim()); }
+function kakaoUrl(p) { return p.kakaoUrl || ('https://map.kakao.com/?q=' + encodeURIComponent(p.name)); }
+let toastTimer = null;
+function toast(msg) {
+  const t = $('#toast'); t.textContent = msg; t.hidden = false;
+  clearTimeout(toastTimer); toastTimer = setTimeout(() => { t.hidden = true; }, 2600);
+}
+
+/* ---------- 데이터 저장소: Firebase ---------- */
+async function makeFirebaseStore(cfg) {
+  const base = 'https://www.gstatic.com/firebasejs/10.12.2/';
+  const [appM, authM, dbM] = await Promise.all([
+    import(base + 'firebase-app.js'), import(base + 'firebase-auth.js'), import(base + 'firebase-database.js')
+  ]);
+  const app = appM.initializeApp(cfg);
+  const auth = authM.getAuth(app);
+  const db = dbM.getDatabase(app);
+  const { ref, get, set, update, onValue } = dbM;
+  const uid = await new Promise((resolve, reject) => {
+    let done = false;
+    authM.onAuthStateChanged(auth, (u) => {
+      if (done) return;
+      if (u) { done = true; resolve(u.uid); }
+      else authM.signInAnonymously(auth).catch(reject);
+    }, reject);
+  });
+  return {
+    uid,
+    async isMember() {
+      try { return (await get(ref(db, `members/${uid}`))).exists(); }
+      catch (e) { if (isDenied(e)) return false; throw e; }
+    },
+    async join(code, nick) {
+      try { await set(ref(db, `members/${uid}`), { nick, code, joinedAt: Date.now() }); }
+      catch (e) { if (isDenied(e)) throw new Error('BAD_CODE'); throw e; }
+    },
+    async checkAdmin() {
+      try { return (await get(ref(db, `admins/${uid}`))).exists(); } catch (e) { return false; }
+    },
+    async becomeAdmin(code) {
+      try { await set(ref(db, `admins/${uid}`), { code }); }
+      catch (e) { if (isDenied(e)) throw new Error('BAD_CODE'); throw e; }
+    },
+    async leaveAdmin() { await set(ref(db, `admins/${uid}`), null); },
+    async changeJoinCode(newCode, nick) {
+      await set(ref(db, 'secret/joinCode'), newCode);
+      await set(ref(db, `members/${uid}`), { nick, code: newCode, joinedAt: Date.now() });
+    },
+    subscribe(onData, onError) {
+      const st = { places: null, ratings: null };
+      const emit = () => { if (st.places && st.ratings) onData(st.places, st.ratings); };
+      const u1 = onValue(ref(db, 'places'), (s) => { st.places = s.val() || {}; emit(); }, onError);
+      const u2 = onValue(ref(db, 'ratings'), (s) => { st.ratings = s.val() || {}; emit(); }, onError);
+      return () => { u1(); u2(); };
+    },
+    async exists(pid) { return (await get(ref(db, `places/${pid}`))).exists(); },
+    async write(updates) { await update(ref(db), updates); }
+  };
+}
+
+/* ---------- 데이터 저장소: 체험 모드 (이 브라우저에만 저장) ---------- */
+function makeDemoStore() {
+  const KEY = 'matjip_demo_db';
+  const now = Date.now(), H = 3600e3;
+  const seed = {
+    secret: { joinCode: 'demo', adminCode: 'admin' },
+    members: {}, admins: {},
+    places: {
+      'demo-p1': { name: '골목 멸치국수 (예시)', address: '경기 시흥시 장곡동 예시주소', category: '국수', lat: 37.3832, lng: 126.8064, menu: '멸치국수', note: '멸치국수 최고, 김밥도 꼭 시키기', status: 'visited', tags: { '한식': true, '혼밥': true }, authorUid: 'u-jisu', authorNick: '지수', createdAt: now - 3 * H },
+      'demo-p2': { name: '홍반장 짜장 (예시)', address: '경기 시흥시 하중동 예시주소', category: '중식', lat: 37.3768, lng: 126.7986, menu: '탕수육', note: '룸 있어서 회식하기 좋음. 탕수육 필수', status: 'visited', tags: { '중식': true, '회식': true }, authorUid: 'u-junho', authorNick: '준호', createdAt: now - 30 * H },
+      'demo-p3': { name: '소금빵 공방 (예시)', address: '경기 시흥시 연성동 예시주소', category: '베이커리', lat: 37.3869, lng: 126.8110, menu: '소금빵', note: '오후 3시쯤 가면 갓 구운 빵이 나온대요', status: 'wish', tags: { '카페': true }, authorUid: 'u-minji', authorNick: '민지', createdAt: now - 50 * H }
+    },
+    ratings: {
+      'demo-p1': {
+        'u-jisu': { score: 5, nick: '지수', updatedAt: now - 3 * H },
+        'u-minji': { score: 4, comment: '국물이 좀 짰음', nick: '민지', updatedAt: now - 2 * H },
+        'u-junho': { score: 4, comment: '웨이팅 있어도 갈 만함', nick: '준호', updatedAt: now - 1 * H }
+      },
+      'demo-p2': {
+        'u-junho': { score: 4, nick: '준호', updatedAt: now - 30 * H },
+        'u-jisu': { score: 4, comment: '짬뽕은 평범, 탕수육은 인정', nick: '지수', updatedAt: now - 20 * H }
+      }
+    }
+  };
+  let db = ls.get(KEY) || seed;
+  const uid = 'demo-me';
+  let listener = null;
+  const save = () => { ls.set(KEY, db); if (listener) setTimeout(() => listener(db.places || {}, db.ratings || {}), 0); };
+  function setPath(path, val) {
+    const keys = path.split('/'); let o = db;
+    for (let i = 0; i < keys.length - 1; i++) { if (typeof o[keys[i]] !== 'object' || o[keys[i]] === null) o[keys[i]] = {}; o = o[keys[i]]; }
+    const last = keys[keys.length - 1];
+    if (val === null) delete o[last]; else o[last] = JSON.parse(JSON.stringify(val));
+  }
+  return {
+    uid,
+    async isMember() { return !!(db.members[uid] && db.members[uid].code === db.secret.joinCode); },
+    async join(code, nick) { if (code !== db.secret.joinCode) throw new Error('BAD_CODE'); db.members[uid] = { nick, code, joinedAt: Date.now() }; save(); },
+    async checkAdmin() { return !!db.admins[uid]; },
+    async becomeAdmin(code) { if (code !== db.secret.adminCode) throw new Error('BAD_CODE'); db.admins[uid] = { code }; save(); },
+    async leaveAdmin() { delete db.admins[uid]; save(); },
+    async changeJoinCode(newCode, nick) { db.secret.joinCode = newCode; db.members[uid] = { nick, code: newCode, joinedAt: Date.now() }; save(); },
+    subscribe(onData) { listener = onData; setTimeout(() => onData(db.places || {}, db.ratings || {}), 0); return () => { listener = null; }; },
+    async exists(pid) { return !!(db.places && db.places[pid]); },
+    async write(updates) { Object.entries(updates).forEach(([p, v]) => setPath(p, v)); save(); }
+  };
+}
+
+/* ---------- 카카오 지도 · 장소검색 ---------- */
+let kakaoReady = null;
+function ensureKakao() {
+  if (!CONFIG.kakaoJsKey) return Promise.reject(new Error('NO_KEY'));
+  if (kakaoReady) return kakaoReady;
+  kakaoReady = new Promise((resolve, reject) => {
+    const s = document.createElement('script');
+    s.src = `https://dapi.kakao.com/v2/maps/sdk.js?appkey=${encodeURIComponent(CONFIG.kakaoJsKey)}&libraries=services&autoload=false`;
+    s.onload = () => window.kakao.maps.load(() => resolve(window.kakao));
+    s.onerror = () => { kakaoReady = null; reject(new Error('LOAD_FAIL')); };
+    document.head.appendChild(s);
+  });
+  return kakaoReady;
+}
+const DEMO_RESULTS = [
+  { id: 'demo-p1', place_name: '골목 멸치국수 (예시)', category_name: '음식점 > 한식 > 국수', address_name: '경기 시흥시 장곡동 예시주소', road_address_name: '', x: '126.8064', y: '37.3832', phone: '', place_url: '' },
+  { id: 'demo-s1', place_name: '시장 손칼국수 (예시)', category_name: '음식점 > 한식 > 국수', address_name: '경기 시흥시 신천동 예시주소', road_address_name: '', x: '126.8012', y: '37.3815', phone: '', place_url: '' },
+  { id: 'demo-s2', place_name: '면사랑 국수집 (예시)', category_name: '음식점 > 한식 > 국수', address_name: '경기 시흥시 은행동 예시주소', road_address_name: '', x: '126.7951', y: '37.3790', phone: '', place_url: '' },
+  { id: 'demo-s3', place_name: '돈까스 연구소 (예시)', category_name: '음식점 > 일식 > 돈까스', address_name: '경기 시흥시 장곡동 예시주소', road_address_name: '', x: '126.8070', y: '37.3841', phone: '', place_url: '' },
+  { id: 'demo-s4', place_name: '오늘의 쌀국수 (예시)', category_name: '음식점 > 아시아음식 > 베트남음식', address_name: '경기 시흥시 하중동 예시주소', road_address_name: '', x: '126.7990', y: '37.3772', phone: '', place_url: '' }
+];
+async function searchPlaces(q) {
+  if (!CONFIG.kakaoJsKey) {
+    const k = q.replace(/\s/g, '');
+    return DEMO_RESULTS.filter((r) => !k || (r.place_name + r.category_name).replace(/\s/g, '').includes(k));
+  }
+  const kakao = await ensureKakao();
+  const ps = new kakao.maps.services.Places();
+  return new Promise((resolve, reject) => {
+    ps.keywordSearch(q, (data, status) => {
+      if (status === kakao.maps.services.Status.OK) resolve(data);
+      else if (status === kakao.maps.services.Status.ZERO_RESULT) resolve([]);
+      else reject(new Error('SEARCH_FAIL'));
+    }, { location: new kakao.maps.LatLng(CONFIG.center.lat, CONFIG.center.lng), radius: CONFIG.searchRadius, sort: kakao.maps.services.SortBy.ACCURACY });
+  });
+}
+
+/* ---------- 상태 ---------- */
+const S = {
+  store: null, uid: null, joined: false, isAdmin: false,
+  nick: '', code: '', places: {}, ratings: {}, ready: false,
+  view: 'list', tag: '전체', sort: 'recent', myPos: null,
+  form: null, unsub: null, map: null, overlays: []
+};
+
+function stats(pid) {
+  const p = S.places[pid]; const rs = S.ratings[pid] || {};
+  const all = Object.entries(rs).map(([uid, r]) => ({ uid, ...r }));
+  const author = p ? rs[p.authorUid] : null;
+  const others = all.filter((r) => !p || r.uid !== p.authorUid);
+  const avg = (arr) => arr.length ? arr.reduce((s, r) => s + Number(r.score || 0), 0) / arr.length : null;
+  return { all, others, author, avgAll: avg(all), avgOthers: avg(others), mine: rs[S.uid] || null };
+}
+const canManage = (p) => !!p && (p.authorUid === S.uid || S.isAdmin);
+const tagsOf = (p) => Object.keys(p.tags || {});
+const origin = () => S.myPos || CONFIG.center;
+
+/* ---------- 화면 전환 ---------- */
+function show(id) {
+  ['v-loading', 'v-entry', 'v-home', 'v-detail', 'v-form'].forEach((v) => { $('#' + v).hidden = v !== id; });
+  window.scrollTo(0, 0);
+}
+function route() {
+  closeSheet();
+  if (!S.joined) { show('v-entry'); return; }
+  const h = location.hash;
+  let m;
+  if ((m = h.match(/^#\/p\/(.+)$/))) { renderDetail(decodeURIComponent(m[1])); show('v-detail'); }
+  else if (h === '#/new') { S.form = newForm(); renderForm(); show('v-form'); setTimeout(() => $('#q') && $('#q').focus(), 50); }
+  else if ((m = h.match(/^#\/edit\/(.+)$/))) {
+    const pid = decodeURIComponent(m[1]); const p = S.places[pid];
+    if (!p || !canManage(p)) { location.hash = '#/'; return; }
+    S.form = editForm(pid, p); renderForm(); show('v-form');
+  } else { renderHome(); show('v-home'); if (S.view === 'map') renderMap(); }
+}
+window.addEventListener('hashchange', route);
+
+/* ---------- 입장 ---------- */
+function showEntry(msg) {
+  S.joined = false;
+  $('#demo-note').hidden = !DEMO;
+  $('#in-nick').value = S.nick || '';
+  $('#in-code').value = '';
+  const err = $('#entry-err'); err.textContent = msg || ''; err.hidden = !msg;
+  show('v-entry');
+}
+$('#entry-form').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const code = $('#in-code').value.trim(); const nick = $('#in-nick').value.trim();
+  const err = $('#entry-err');
+  if (!code || !nick) { err.textContent = '그룹 코드와 닉네임을 모두 입력해 주세요.'; err.hidden = false; return; }
+  const btn = $('#entry-btn'); btn.disabled = true;
+  try {
+    await S.store.join(code, nick);
+    S.nick = nick; S.code = code; ls.set('matjip_session', { nick, code });
+    await enter();
+  } catch (ex) {
+    err.textContent = ex.message === 'BAD_CODE' ? '그룹 코드가 맞지 않아요. 부서 단톡방의 코드를 다시 확인해 주세요.' : '연결이 잠깐 끊겼어요. 잠시 후 다시 시도해 주세요.';
+    err.hidden = false;
+  } finally { btn.disabled = false; }
+});
+async function enter() {
+  S.joined = true; S.ready = false;
+  S.isAdmin = await S.store.checkAdmin();
+  if (S.unsub) S.unsub();
+  S.unsub = S.store.subscribe((places, ratings) => {
+    S.places = places; S.ratings = ratings; S.ready = true; refresh();
+  }, (e) => {
+    if (S.unsub) S.unsub(); S.unsub = null;
+    showEntry(isDenied(e) ? '그룹 코드가 바뀌었어요. 새 코드를 입력해 주세요.' : '연결이 끊겼어요. 새로고침해 주세요.');
+  });
+  route();
+}
+function refresh() {
+  if (!S.joined) return;
+  const h = location.hash; const m = h.match(/^#\/p\/(.+)$/);
+  if (m) renderDetail(decodeURIComponent(m[1]));
+  else if (h === '#/' || h === '' || h === '#') { renderHome(); if (S.view === 'map') renderMap(); }
+  else if (h === '#/new' && S.form && S.form.results) renderResults();
+}
+
+/* ---------- 홈 ---------- */
+function filtered() {
+  let arr = Object.entries(S.places).map(([pid, p]) => ({ pid, p, st: stats(pid), km: distKm(origin(), p) }));
+  if (S.tag === '가보고 싶어요') arr = arr.filter((x) => x.p.status === 'wish');
+  else if (S.tag !== '전체') arr = arr.filter((x) => tagsOf(x.p).includes(S.tag));
+  if (S.sort === 'rating') arr.sort((a, b) => (b.st.avgAll ?? -1) - (a.st.avgAll ?? -1) || b.st.all.length - a.st.all.length);
+  else if (S.sort === 'distance') arr.sort((a, b) => a.km - b.km);
+  else arr.sort((a, b) => (b.p.createdAt || 0) - (a.p.createdAt || 0));
+  return arr;
+}
+function renderHome() {
+  $('#home-sub').textContent = `${S.nick} 님, 오늘 점심은 어디로?`;
+  const chipNames = ['전체', ...TAGS, '가보고 싶어요'];
+  $('#chips').innerHTML = chipNames.map((t, i) => {
+    const rot = [-2, 1.5, -1, 2, -1.5, 1][i % 6];
+    return `<button class="chip" data-act="tag" data-tag="${esc(t)}" aria-pressed="${S.tag === t}" style="background:${TAG_BG[i % 4]};transform:rotate(${rot}deg)">${esc(t)}</button>`;
+  }).join('');
+  $('#sort-sel').value = S.sort;
+  document.querySelectorAll('.seg button').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.v === S.view)));
+  $('#list').hidden = S.view !== 'list';
+  $('#mapbox').hidden = S.view !== 'map';
+  if (!S.ready) { $('#count').textContent = '불러오는 중…'; $('#list').innerHTML = ''; return; }
+  const arr = filtered();
+  $('#count').textContent = `붙여둔 맛집 ${arr.length}곳`;
+  if (!arr.length) {
+    const none = !Object.keys(S.places).length;
+    $('#list').innerHTML = `<div class="empty"><span class="hand">${none ? '아직 빈 수첩이에요' : '이 태그엔 아직 없어요'}</span>${none ? '오른쪽 아래 <b>맛집 붙이기</b>로 첫 장을 붙여 보세요.' : '다른 태그를 골라 보거나 새로 붙여 보세요.'}</div>`;
+    return;
+  }
+  const rots = [-1.2, 1, -0.6, 0.8];
+  const tapePos = ['left:50%;margin-left:-34px;transform:rotate(3deg)', 'left:18px;transform:rotate(-6deg)', 'right:22px;transform:rotate(5deg)'];
+  $('#list').innerHTML = arr.map(({ pid, p, st, km }, i) => {
+    const right = st.avgAll != null ? `<span class="score">★ ${st.avgAll.toFixed(1)}</span>` : `<span class="wish">${p.status === 'wish' ? '가보고 싶어요' : '별점 없음'}</span>`;
+    const meta = [`추천 ${esc(p.authorNick)}`, ...tagsOf(p).map(esc), st.all.length ? `별점 ${st.all.length}명` : '', S.sort === 'distance' ? fmtDist(km) : ''].filter(Boolean).join(' · ');
+    return `<a class="card" href="#/p/${encodeURIComponent(pid)}" style="transform:rotate(${rots[i % 4]}deg)">
+      <span class="tape" style="${tapePos[i % 3]};background:${TAPES[i % 3]}" aria-hidden="true"></span>
+      <div class="slip">
+        <div class="slip-top"><strong>${esc(p.name)}</strong>${right}</div>
+        <div class="slip-meta">${meta}</div>
+        ${p.note ? `<hr class="dash"><p class="slip-note">"${esc(p.note)}"</p>` : ''}
+      </div>
+      <div class="zig-b" aria-hidden="true"></div>
+    </a>`;
+  }).join('');
+}
+async function renderMap() {
+  const ph = $('#map-ph');
+  if (!CONFIG.kakaoJsKey) {
+    ph.innerHTML = '<span class="hand" style="font-size:26px;color:var(--ink)">지도는 준비 중</span>카카오 JavaScript 키를 설정하면<br>붙여둔 맛집이 지도에 표시돼요.';
+    ph.hidden = false; return;
+  }
+  let kakao;
+  try { kakao = await ensureKakao(); } catch (e) { ph.textContent = '지도를 불러오지 못했어요. 카카오 키와 등록한 도메인을 확인해 주세요.'; ph.hidden = false; return; }
+  ph.hidden = true;
+  if (!S.map) S.map = new kakao.maps.Map($('#map'), { center: new kakao.maps.LatLng(CONFIG.center.lat, CONFIG.center.lng), level: 5 });
+  S.map.relayout();
+  S.overlays.forEach((o) => o.setMap(null)); S.overlays = [];
+  const arr = filtered(); const bounds = new kakao.maps.LatLngBounds();
+  arr.forEach(({ pid, p, st }) => {
+    const pos = new kakao.maps.LatLng(p.lat, p.lng); bounds.extend(pos);
+    const el = document.createElement('a');
+    el.className = 'pin'; el.href = '#/p/' + encodeURIComponent(pid);
+    el.innerHTML = `${esc(p.name)}${st.avgAll != null ? ` <b>★${st.avgAll.toFixed(1)}</b>` : ''}`;
+    const ov = new kakao.maps.CustomOverlay({ position: pos, content: el, yAnchor: 1 });
+    ov.setMap(S.map); S.overlays.push(ov);
+  });
+  if (arr.length > 1) S.map.setBounds(bounds); else if (arr.length === 1) S.map.setCenter(new kakao.maps.LatLng(arr[0].p.lat, arr[0].p.lng));
+}
+$('#sort-sel').addEventListener('change', (e) => {
+  S.sort = e.target.value;
+  if (S.sort === 'distance' && !S.myPos) {
+    if (!navigator.geolocation) { toast(`${CONFIG.center.label} 기준으로 정렬했어요.`); renderHome(); return; }
+    navigator.geolocation.getCurrentPosition(
+      (pos) => { S.myPos = { lat: pos.coords.latitude, lng: pos.coords.longitude }; renderHome(); },
+      () => { toast(`현재 위치를 못 가져와서 ${CONFIG.center.label} 기준으로 정렬했어요.`); renderHome(); },
+      { timeout: 6000, maximumAge: 300000 }
+    );
+  }
+  renderHome();
+});
+
+/* ---------- 상세 (영수증) ---------- */
+function renderDetail(pid) {
+  const el = $('#v-detail'); const p = S.places[pid];
+  if (!S.ready) { el.innerHTML = '<div class="loading">영수증 꺼내는 중…</div>'; return; }
+  if (!p) {
+    el.innerHTML = `<div class="top"><a class="icon-btn" href="#/" aria-label="뒤로">${ICON.back}</a></div><div class="empty"><span class="hand">사라진 영수증이에요</span>삭제됐거나 없는 맛집이에요.</div>`;
+    return;
+  }
+  const st = stats(pid); const mine = p.authorUid === S.uid;
+  const tags = tagsOf(p);
+  let stamp = '';
+  if (p.status === 'wish') stamp = '<div class="stamp" aria-hidden="true"><span>가보고</span><span>싶어요</span></div>';
+  else if (st.avgAll != null && st.avgAll >= 4.5 && st.all.length >= 2) stamp = '<div class="stamp" aria-hidden="true"><span>강력</span><span>추천</span></div>';
+  const voices = st.others.sort((a, b) => (b.updatedAt || 0) - (a.updatedAt || 0)).map((r) => {
+    const me = r.uid === S.uid;
+    const del = (me || S.isAdmin) ? `<button class="tiny" data-act="del-rating" data-pid="${esc(pid)}" data-uid="${esc(r.uid)}">지우기</button>` : '';
+    return `<li><div class="who"><span><strong>${esc(r.nick)}</strong>${me ? '<em>나</em>' : ''}</span><span>★ ${Number(r.score)} ${del}</span></div>${r.comment ? `<span class="txt">${esc(r.comment)}</span>` : ''}</li>`;
+  }).join('');
+  const btnLabel = mine ? (st.author ? '등록자 평점 고치기' : '등록자 평점 남기기') : (st.mine ? '내 별점 고치기' : '내 별점 도장 찍기');
+  el.innerHTML = `
+    <div class="top">
+      <a class="icon-btn" href="#/" aria-label="뒤로">${ICON.back}</a>
+      ${canManage(p) ? `<div><a class="text-btn" style="display:inline-flex;align-items:center" href="#/edit/${encodeURIComponent(pid)}">수정</a><button class="text-btn danger" data-act="del-place" data-pid="${esc(pid)}">삭제</button></div>` : ''}
+    </div>
+    <div class="receipt-wrap">
+      <div class="zig-t" aria-hidden="true"></div>
+      <article class="receipt">
+        ${stamp}
+        <p class="head">*** 우리과 맛집 수첩 ***</p>
+        <h1>${esc(p.name)}</h1>
+        ${p.address ? `<p class="sub">${esc(p.address)}</p>` : ''}
+        <p class="sub">등록 ${fmtDate(p.createdAt)}</p>
+        <hr class="dash" style="margin:16px 0 12px">
+        <div class="rows">
+          <div class="row"><span>추천인</span><span>${esc(p.authorNick)}</span></div>
+          ${tags.length ? `<div class="row"><span>분류</span><span>${tags.map(esc).join(' · ')}</span></div>` : ''}
+          ${p.menu ? `<div class="row"><span>대표메뉴</span><span>${esc(p.menu)}</span></div>` : ''}
+          <div class="row"><span>상태</span><span>${p.status === 'wish' ? '가보고 싶어요' : '가봤어요'}</span></div>
+          <div class="row"><span>거리</span><span>${fmtDist(distKm(origin(), p))}</span></div>
+        </div>
+        ${p.note ? `<p class="quote">"${esc(p.note)}"</p>` : ''}
+        <hr class="dash" style="margin:14px 0 12px">
+        <div class="rows">
+          <div class="row"><span>등록자 평점</span><span>${st.author ? '★ ' + Number(st.author.score).toFixed(1) : '-'}</span></div>
+          <div class="row big"><span>멤버 평균</span><span>${st.avgOthers != null ? `★ ${st.avgOthers.toFixed(1)} (${st.others.length})` : '아직 없음'}</span></div>
+        </div>
+        <hr class="dash" style="margin:14px 0 12px">
+        <p style="margin:0 0 10px;font-size:12px;color:var(--ink-soft)">멤버 한마디</p>
+        ${voices ? `<ul class="voices">${voices}</ul>` : '<p style="margin:0;font-family:var(--f-body);font-size:14px;color:var(--ink-soft)">첫 별점 도장을 찍어 주세요.</p>'}
+        <hr class="dash" style="margin:16px 0 14px">
+        <div class="links">
+          <a href="${esc(naverMapUrl(p))}" target="_blank" rel="noopener">${ICON.pin}네이버지도</a>
+          <a href="${esc(naverBlogUrl(p))}" target="_blank" rel="noopener">${ICON.doc}블로그 후기</a>
+          <a href="${esc(kakaoUrl(p))}" target="_blank" rel="noopener">${ICON.map}카카오맵</a>
+        </div>
+        <div class="barcode" aria-hidden="true"></div>
+        <p style="margin:0;text-align:center;font-size:11px;letter-spacing:3px">No. ${esc(String(pid).slice(-6).toUpperCase())}</p>
+        <p style="margin:12px 0 0;text-align:center;font-size:12px;color:var(--ink-soft)">맛있게 드셨나요? 또 들러 주세요</p>
+      </article>
+      <div class="zig-b" aria-hidden="true"></div>
+    </div>
+    <div class="bottom-bar"><button class="btn-accent" data-act="rate" data-pid="${esc(pid)}">${ICON.star}${btnLabel}</button></div>`;
+}
+
+/* ---------- 별점 시트 ---------- */
+function openRating(pid) {
+  const p = S.places[pid]; if (!p) return;
+  const st = stats(pid); const isAuthor = p.authorUid === S.uid;
+  const cur = st.mine || {};
+  S.rate = { pid, score: Number(cur.score) || 0, isAuthor };
+  openSheet(`
+    <h2 class="hand">${isAuthor ? '등록자 평점' : '별점 도장'}</h2>
+    <p class="sub">${esc(p.name)}</p>
+    <div class="group">
+      <span class="lbl" style="font-size:13px;color:var(--ink-soft)">별점</span>
+      <div class="stars" id="rs-stars" role="group" aria-label="별점 선택">${starButtons(S.rate.score, 'rs-score')}</div>
+    </div>
+    ${isAuthor ? '' : `<div class="group">
+      <label class="lbl" for="rs-comment" style="font-size:13px;color:var(--ink-soft)">한마디 (선택)</label>
+      <textarea class="box-input" id="rs-comment" rows="2" maxlength="100" placeholder="예: 국물이 좀 짰어요">${esc(cur.comment || '')}</textarea>
+      <div class="counter" id="rs-count">${(cur.comment || '').length}/100</div>
+    </div>`}
+    <div class="actions">
+      ${st.mine && !isAuthor ? '<button class="btn-line danger" data-act="rs-del">별점 지우기</button>' : ''}
+      <button class="btn-accent" data-act="rs-save">${ICON.star}도장 찍기</button>
+    </div>`);
+  const ta = $('#rs-comment');
+  if (ta) ta.addEventListener('input', () => { $('#rs-count').textContent = `${ta.value.length}/100`; });
+}
+function starButtons(score, act) {
+  return [1, 2, 3, 4, 5].map((n) => `<button type="button" class="${n <= score ? 'on' : ''}" data-act="${act}" data-score="${n}" aria-label="${n}점" aria-pressed="${n === score}">★</button>`).join('');
+}
+function stampFx() {
+  const fx = $('#stamp-fx'); fx.hidden = false;
+  const d = fx.firstElementChild; d.style.animation = 'none'; void d.offsetWidth; d.style.animation = '';
+  setTimeout(() => { fx.hidden = true; }, 950);
+}
+
+/* ---------- 설정 시트 ---------- */
+function openSettings() {
+  openSheet(`
+    <h2 class="hand">수첩 설정</h2>
+    <p class="sub">${DEMO ? '체험 모드 · 이 브라우저에만 저장돼요' : '우리과 맛집 수첩'}</p>
+    <div class="group">
+      <label for="st-nick" style="font-size:13px;color:var(--ink-soft)">닉네임</label>
+      <div class="inline"><input class="box-input" id="st-nick" maxlength="12" value="${esc(S.nick)}"><button class="small-btn" data-act="st-nick">저장</button></div>
+      <p class="note">새로 쓰는 글과 별점부터 바뀐 닉네임으로 보여요.</p>
+    </div>
+    <div class="group">
+      ${S.isAdmin ? `
+        <span class="badge">관리자 모드 켜짐</span>
+        <label for="st-code" style="font-size:13px;color:var(--ink-soft)">그룹 코드 바꾸기</label>
+        <div class="inline"><input class="box-input" id="st-code" maxlength="40" placeholder="새 코드 (4자 이상)"><button class="small-btn" data-act="st-code">변경</button></div>
+        <p class="note">바꾸면 모든 멤버가 새 코드를 다시 입력해야 해요. 부서 단톡방에 새 코드를 공유해 주세요.</p>
+        <button class="btn-line" data-act="st-unadmin">관리자 모드 끄기</button>` : `
+        <label for="st-admin" style="font-size:13px;color:var(--ink-soft)">관리자 코드</label>
+        <div class="inline"><input class="box-input" id="st-admin" type="password" placeholder="관리자만 입력"><button class="small-btn" data-act="st-admin">확인</button></div>
+        <p class="note">관리자는 모든 글을 수정·삭제하고 그룹 코드를 바꿀 수 있어요.</p>`}
+    </div>
+    <div class="group">
+      <button class="btn-line" data-act="st-leave">이 기기에서 나가기</button>
+    </div>`);
+}
+
+/* ---------- 확인 시트 ---------- */
+function confirmSheet(title, body, yesLabel, onYes) {
+  S.onConfirm = onYes;
+  openSheet(`<h2 class="hand">${esc(title)}</h2><p class="sub" style="line-height:1.6">${esc(body)}</p>
+    <div class="actions"><button class="btn-line" data-act="sheet-close">취소</button><button class="btn-line danger" data-act="cf-yes">${esc(yesLabel)}</button></div>`);
+}
+function openSheet(html) {
+  const sh = $('#sheet'); sh.innerHTML = '<div class="grab" aria-hidden="true"></div>' + html;
+  sh.hidden = false; $('#backdrop').hidden = false;
+}
+function closeSheet() { $('#sheet').hidden = true; $('#backdrop').hidden = true; S.onConfirm = null; }
+
+/* ---------- 등록 / 수정 ---------- */
+function newForm() { return { pid: null, place: null, results: null, query: '', tags: new Set(), menu: '', note: '', status: 'visited', score: 0, edit: false }; }
+function editForm(pid, p) {
+  const mine = (S.ratings[pid] || {})[S.uid];
+  return { pid, place: { id: pid, name: p.name, address: p.address, category: p.category }, results: null, query: '', tags: new Set(tagsOf(p)), menu: p.menu || '', note: p.note || '', status: p.status, score: mine ? Number(mine.score) : 0, edit: true, isAuthor: p.authorUid === S.uid };
+}
+function renderForm() {
+  const f = S.form; const el = $('#v-form');
+  const showScore = f.status === 'visited' && (!f.edit || f.isAuthor);
+  el.innerHTML = `
+    <header class="form-head">
+      <a class="icon-btn" href="${f.edit ? '#/p/' + encodeURIComponent(f.pid) : '#/'}" aria-label="닫기">${ICON.close}</a>
+      <h1 class="hand">${f.edit ? '영수증 고치기' : '새 맛집 붙이기'}</h1>
+    </header>
+    ${f.edit ? `<section class="sec"><div class="picked"><strong class="mono">${esc(f.place.name)}</strong><div class="muted" style="font-size:12px;margin-top:4px">${esc(f.place.address || '')}</div></div></section>` : `
+    <section class="sec">
+      <label class="lbl" for="q">1. 가게 찾기 (카카오 장소검색)</label>
+      <form class="searchbox" id="search-form" role="search">
+        ${ICON.search}
+        <input id="q" value="${esc(f.query)}" placeholder="가게 이름으로 검색" enterkeyhint="search">
+        <button type="submit">검색</button>
+      </form>
+      ${!CONFIG.kakaoJsKey ? '<p class="muted" style="font-size:12px;margin:6px 2px 0">카카오 키가 없어서 예시 가게로 검색돼요.</p>' : ''}
+      <div id="results"></div>
+    </section>`}
+    <div id="form-rest" ${!f.place ? 'hidden' : ''}>
+      <section class="sec">
+        <span class="lbl">${f.edit ? '' : '2. '}태그 스티커 고르기 (최대 4개)</span>
+        <div class="tagpick" role="group" aria-label="태그">${TAGS.map((t) => `<button type="button" class="chip" data-act="ftag" data-tag="${esc(t)}" aria-pressed="${f.tags.has(t)}">${esc(t)}</button>`).join('')}</div>
+      </section>
+      <section class="sec">
+        <span class="lbl">${f.edit ? '' : '3. '}가봤나요?</span>
+        <div class="toggle2" role="group" aria-label="방문 상태">
+          <button type="button" data-act="fstatus" data-v="visited" aria-pressed="${f.status === 'visited'}">가봤어요</button>
+          <button type="button" data-act="fstatus" data-v="wish" aria-pressed="${f.status === 'wish'}">가보고 싶어요</button>
+        </div>
+      </section>
+      <section class="sec">
+        <label class="lbl" for="f-menu">${f.edit ? '' : '4. '}대표메뉴</label>
+        <input class="line-input" id="f-menu" maxlength="40" value="${esc(f.menu)}" placeholder="예: 바지락칼국수">
+      </section>
+      <section class="sec">
+        <label class="lbl" for="f-note">${f.edit ? '' : '5. '}한줄평</label>
+        <textarea class="box-input" id="f-note" rows="2" maxlength="100" placeholder="동료들에게 한마디">${esc(f.note)}</textarea>
+        <div class="counter" id="f-count">${f.note.length}/100</div>
+      </section>
+      ${showScore ? `<section class="sec">
+        <span class="lbl">${f.edit ? '' : '6. '}내 별점</span>
+        <div class="stars" id="f-stars" role="group" aria-label="별점 선택">${starButtons(f.score, 'fscore')}</div>
+      </section>` : ''}
+    </div>
+    <div class="bottom-bar"><button class="btn-accent" data-act="save" id="save-btn" ${!f.place ? 'disabled' : ''}>${f.edit ? '고치기 완료' : '수첩에 붙이기'}</button></div>`;
+  if (!f.edit) {
+    renderResults();
+    $('#search-form').addEventListener('submit', (e) => { e.preventDefault(); doSearch(); });
+  }
+  const note = $('#f-note');
+  note.addEventListener('input', () => { S.form.note = note.value; $('#f-count').textContent = `${note.value.length}/100`; });
+  $('#f-menu').addEventListener('input', (e) => { S.form.menu = e.target.value; });
+}
+async function doSearch() {
+  const q = $('#q').value.trim(); S.form.query = q;
+  if (!q) { toast('가게 이름을 입력해 주세요.'); return; }
+  $('#results').innerHTML = '<p class="muted" style="font-size:13px;margin:10px 2px 0">찾는 중…</p>';
+  try { S.form.results = await searchPlaces(q); }
+  catch (e) { S.form.results = []; toast(e.message === 'NO_KEY' ? '카카오 키를 설정해 주세요.' : '검색이 안 됐어요. 카카오 키와 등록 도메인을 확인해 주세요.'); }
+  renderResults();
+}
+function renderResults() {
+  const box = $('#results'); const f = S.form; if (!box || !f) return;
+  if (!f.results) { box.innerHTML = ''; return; }
+  if (!f.results.length) { box.innerHTML = '<p class="muted" style="font-size:13px;margin:10px 2px 0">검색 결과가 없어요. 이름을 조금 바꿔서 찾아보세요.</p>'; return; }
+  box.innerHTML = `<ul class="results">${f.results.slice(0, 10).map((r, i) => {
+    const pid = String(r.id); const exists = !!S.places[pid];
+    const cat = String(r.category_name || '').split('>').pop().trim();
+    const addr = r.road_address_name || r.address_name || '';
+    const sel = f.place && f.place.id === pid;
+    return `<li>${exists
+      ? `<div class="item"><span><span class="nm">${esc(r.place_name)}</span><span class="ad">${esc(cat)} · ${esc(addr)}</span></span><a class="dup" href="#/p/${encodeURIComponent(pid)}">이미 있어요 · 별점 남기기</a></div>`
+      : `<button type="button" class="item" data-act="pick" data-i="${i}" aria-pressed="${sel}"><span><span class="nm">${esc(r.place_name)}</span><span class="ad">${esc(cat)} · ${esc(addr)}</span></span>${sel ? ICON.check : ''}</button>`}</li>`;
+  }).join('')}</ul>`;
+}
+function pick(i) {
+  const r = S.form.results[i]; if (!r) return;
+  S.form.place = {
+    id: String(r.id), name: r.place_name, address: r.road_address_name || r.address_name || '',
+    category: String(r.category_name || '').split('>').pop().trim(), phone: r.phone || '',
+    kakaoUrl: r.place_url || '', lat: Number(r.y), lng: Number(r.x)
+  };
+  renderResults();
+  $('#form-rest').hidden = false; $('#save-btn').disabled = false;
+  $('#form-rest').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+async function save() {
+  const f = S.form; if (!f || !f.place) { toast('먼저 가게를 골라 주세요.'); return; }
+  f.menu = $('#f-menu').value.trim(); f.note = $('#f-note').value.trim();
+  const needScore = f.status === 'visited' && (!f.edit || f.isAuthor);
+  if (needScore && !f.score) { toast('별점을 골라 주세요. 아직 안 가봤다면 "가보고 싶어요"를 눌러 주세요.'); return; }
+  const btn = $('#save-btn'); btn.disabled = true;
+  const now = Date.now();
+  const tags = f.tags.size ? Object.fromEntries([...f.tags].map((t) => [t, true])) : null;
+  try {
+    if (f.edit) {
+      const base = `places/${f.pid}/`;
+      const up = { [base + 'menu']: f.menu, [base + 'note']: f.note, [base + 'status']: f.status, [base + 'tags']: tags, [base + 'updatedAt']: now };
+      if (needScore) up[`ratings/${f.pid}/${S.uid}`] = { score: f.score, nick: S.nick, updatedAt: now };
+      await S.store.write(up);
+      toast('영수증을 고쳤어요.'); location.hash = '#/p/' + encodeURIComponent(f.pid);
+    } else {
+      const pid = f.place.id;
+      if (await S.store.exists(pid)) { toast('누가 먼저 붙여뒀어요. 별점을 남겨 주세요.'); location.hash = '#/p/' + encodeURIComponent(pid); return; }
+      const place = { name: f.place.name, address: f.place.address, category: f.place.category, lat: f.place.lat, lng: f.place.lng, menu: f.menu, note: f.note, status: f.status, authorUid: S.uid, authorNick: S.nick, createdAt: now, updatedAt: now };
+      if (f.place.phone) place.phone = f.place.phone;
+      if (f.place.kakaoUrl) place.kakaoUrl = f.place.kakaoUrl;
+      if (tags) place.tags = tags;
+      const up = { [`places/${pid}`]: place };
+      if (needScore) up[`ratings/${pid}/${S.uid}`] = { score: f.score, nick: S.nick, updatedAt: now };
+      await S.store.write(up);
+      toast('수첩에 붙였어요.'); location.hash = '#/p/' + encodeURIComponent(pid);
+    }
+  } catch (e) {
+    toast(isDenied(e) ? '저장 권한이 없어요. 그룹 코드가 바뀌었는지 확인해 주세요.' : '저장이 안 됐어요. 잠시 후 다시 시도해 주세요.');
+  } finally { btn.disabled = false; }
+}
+
+/* ---------- 클릭 처리 ---------- */
+document.addEventListener('click', async (e) => {
+  const t = e.target.closest('[data-act]'); if (!t) return;
+  const act = t.dataset.act;
+  try {
+    switch (act) {
+      case 'settings': openSettings(); break;
+      case 'view': S.view = t.dataset.v; renderHome(); if (S.view === 'map') renderMap(); break;
+      case 'tag': S.tag = S.tag === t.dataset.tag ? '전체' : t.dataset.tag; renderHome(); if (S.view === 'map') renderMap(); break;
+      case 'rate': openRating(t.dataset.pid); break;
+      case 'rs-score': S.rate.score = Number(t.dataset.score); $('#rs-stars').innerHTML = starButtons(S.rate.score, 'rs-score'); break;
+      case 'rs-save': {
+        if (!S.rate.score) { toast('별을 하나 이상 골라 주세요.'); return; }
+        const r = { score: S.rate.score, nick: S.nick, updatedAt: Date.now() };
+        const c = $('#rs-comment'); if (c && c.value.trim()) r.comment = c.value.trim().slice(0, 100);
+        await S.store.write({ [`ratings/${S.rate.pid}/${S.uid}`]: r });
+        closeSheet(); stampFx(); break;
+      }
+      case 'rs-del': await S.store.write({ [`ratings/${S.rate.pid}/${S.uid}`]: null }); closeSheet(); toast('별점을 지웠어요.'); break;
+      case 'del-rating': {
+        const { pid, uid } = t.dataset;
+        confirmSheet('별점 지우기', '이 별점과 한마디를 지울까요?', '지우기', async () => { await S.store.write({ [`ratings/${pid}/${uid}`]: null }); toast('별점을 지웠어요.'); });
+        break;
+      }
+      case 'del-place': {
+        const pid = t.dataset.pid; const p = S.places[pid];
+        confirmSheet('영수증 떼기', `"${p ? p.name : ''}"을(를) 삭제할까요? 달린 별점과 한마디도 함께 지워져요.`, '삭제', async () => {
+          await S.store.write({ [`places/${pid}`]: null, [`ratings/${pid}`]: null });
+          location.hash = '#/'; toast('삭제했어요.');
+        });
+        break;
+      }
+      case 'cf-yes': { const fn = S.onConfirm; closeSheet(); if (fn) await fn(); break; }
+      case 'sheet-close': closeSheet(); break;
+      case 'pick': pick(Number(t.dataset.i)); break;
+      case 'ftag': {
+        const tag = t.dataset.tag; const set = S.form.tags;
+        if (set.has(tag)) set.delete(tag); else { if (set.size >= 4) { toast('태그는 4개까지 붙일 수 있어요.'); return; } set.add(tag); }
+        t.setAttribute('aria-pressed', String(set.has(tag))); break;
+      }
+      case 'fstatus': S.form.menu = $('#f-menu').value; S.form.note = $('#f-note').value; S.form.status = t.dataset.v; renderFormKeep(); break;
+      case 'fscore': S.form.score = Number(t.dataset.score); $('#f-stars').innerHTML = starButtons(S.form.score, 'fscore'); break;
+      case 'save': await save(); break;
+      case 'st-nick': {
+        const v = $('#st-nick').value.trim();
+        if (!v || v.length > 12) { toast('닉네임은 1~12자로 입력해 주세요.'); return; }
+        await S.store.join(S.code, v); S.nick = v; ls.set('matjip_session', { nick: v, code: S.code });
+        closeSheet(); renderHome(); toast('닉네임을 바꿨어요.'); break;
+      }
+      case 'st-admin': {
+        try { await S.store.becomeAdmin($('#st-admin').value.trim()); S.isAdmin = true; openSettings(); refresh(); toast('관리자 모드를 켰어요.'); }
+        catch (ex) { toast(ex.message === 'BAD_CODE' ? '관리자 코드가 맞지 않아요.' : '확인이 안 됐어요. 다시 시도해 주세요.'); }
+        break;
+      }
+      case 'st-unadmin': await S.store.leaveAdmin(); S.isAdmin = false; openSettings(); refresh(); toast('관리자 모드를 껐어요.'); break;
+      case 'st-code': {
+        const v = $('#st-code').value.trim();
+        if (v.length < 4) { toast('새 코드는 4자 이상으로 정해 주세요.'); return; }
+        confirmSheet('그룹 코드 바꾸기', '바꾸면 다른 멤버는 모두 새 코드를 다시 입력해야 해요. 진행할까요?', '바꾸기', async () => {
+          await S.store.changeJoinCode(v, S.nick); S.code = v; ls.set('matjip_session', { nick: S.nick, code: v });
+          toast('그룹 코드를 바꿨어요. 단톡방에 공유해 주세요.');
+        });
+        break;
+      }
+      case 'st-leave':
+        confirmSheet('이 기기에서 나가기', '다시 들어오려면 그룹 코드를 입력해야 해요. 이미 쓴 글은 그대로 남아요.', '나가기', async () => {
+          ls.del('matjip_session'); if (S.unsub) S.unsub(); S.unsub = null; S.code = ''; showEntry('');
+        });
+        break;
+    }
+  } catch (ex) {
+    toast(isDenied(ex) ? '권한이 없어요. 그룹 코드가 바뀌었을 수 있어요.' : '처리가 안 됐어요. 잠시 후 다시 시도해 주세요.');
+  }
+});
+function renderFormKeep() { const y = window.scrollY; renderForm(); window.scrollTo(0, y); }
+document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !$('#sheet').hidden) closeSheet(); });
+
+/* ---------- 아이콘 ---------- */
+const sv = (d, w = 18) => `<svg width="${w}" height="${w}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${d}</svg>`;
+const ICON = {
+  back: sv('<path d="M15 18l-6-6 6-6"/>', 22),
+  close: sv('<path d="M6 6l12 12M18 6L6 18"/>', 22),
+  search: sv('<circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/>'),
+  check: sv('<path d="M5 12l5 5 9-10"/>', 22).replace('stroke="currentColor"', 'stroke="var(--accent)"'),
+  pin: sv('<path d="M12 21s-7-6.2-7-11.5a7 7 0 0 1 14 0C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/>'),
+  doc: sv('<path d="M4 4h12l4 4v12H4z"/><path d="M8 11h8M8 15h6"/>'),
+  map: sv('<path d="M9 4L3 6v14l6-2 6 2 6-2V4l-6 2-6-2zM9 4v14M15 6v14"/>'),
+  star: sv('<path d="M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1-4.4-4.3 6.1-.9z"/>', 20)
+};
+
+/* ---------- 시작 ---------- */
+(async function boot() {
+  try { S.store = DEMO ? makeDemoStore() : await makeFirebaseStore(CONFIG.firebase); }
+  catch (e) { $('#v-loading').textContent = '연결에 실패했어요. 설정(Firebase 키)을 확인해 주세요.'; return; }
+  S.uid = S.store.uid;
+  const sess = ls.get('matjip_session');
+  if (sess && sess.nick) {
+    S.nick = sess.nick; S.code = sess.code || '';
+    let ok = false; try { ok = await S.store.isMember(); } catch (e) {}
+    if (ok) { await enter(); return; }
+    showEntry('그룹 코드가 바뀌었어요. 새 코드를 입력해 주세요.');
+  } else showEntry('');
+  if (CONFIG.kakaoJsKey) ensureKakao().catch(() => {});
+})();
+</script>
+</body>
+</html>

@@ -57,6 +57,7 @@ a { color: inherit; text-decoration: none; }
 .icon-btn { width: 44px; height: 44px; border: none; background: transparent; display: inline-flex; align-items: center; justify-content: center; border-radius: 22px; }
 .text-btn { min-height: 40px; padding: 0 12px; border: none; background: transparent; font-size: 14px; border-radius: 8px; }
 .text-btn.danger { color: var(--danger); }
+.share-btn { display: inline-flex; align-items: center; gap: 4px; }
 
 /* ---------- 입장 ---------- */
 .entry { min-height: 100vh; min-height: 100dvh; display: flex; align-items: center; justify-content: center; padding: 24px 16px; background: var(--desk); }
@@ -441,6 +442,54 @@ function ensureKakao() {
   });
   return kakaoReady;
 }
+/* ---------- 카카오톡 공유 ---------- */
+let kakaoShareReady = null;
+function ensureKakaoShare() {
+  if (!CONFIG.kakaoJsKey) return Promise.reject(new Error('NO_KEY'));
+  if (kakaoShareReady) return kakaoShareReady;
+  kakaoShareReady = new Promise((resolve, reject) => {
+    const done = () => {
+      try { if (!window.Kakao.isInitialized()) window.Kakao.init(CONFIG.kakaoJsKey); resolve(window.Kakao); }
+      catch (e) { kakaoShareReady = null; reject(e); }
+    };
+    if (window.Kakao && window.Kakao.Share) { done(); return; }
+    const s = document.createElement('script');
+    s.src = 'https://t1.kakaocdn.net/kakao_js_sdk/2.8.3/kakao.min.js';
+    s.crossOrigin = 'anonymous';
+    s.onload = done;
+    s.onerror = () => { kakaoShareReady = null; reject(new Error('LOAD_FAIL')); };
+    document.head.appendChild(s);
+  });
+  return kakaoShareReady;
+}
+function shareUrl(pid) { return location.origin + location.pathname + '#/p/' + encodeURIComponent(pid); }
+async function sharePlace(pid) {
+  const p = S.places[pid]; if (!p) return;
+  const st = stats(pid); const url = shareUrl(pid);
+  const score = st.avgAll != null ? `★ ${st.avgAll.toFixed(1)} (${st.all.length}명)` : (p.status === 'wish' ? '가보고 싶은 곳' : '아직 별점 없음');
+  const meta = [score, tagsOf(p).join('·'), `${p.authorNick} 추천`].filter(Boolean).join(' · ');
+  const desc = p.note ? `${meta}\n"${p.note}"` : meta;
+  try {
+    const Kakao = await ensureKakaoShare();
+    Kakao.Share.sendDefault({
+      objectType: 'feed',
+      content: {
+        title: p.name,
+        description: desc,
+        imageUrl: new URL('share-card.png', location.href).href,
+        imageWidth: 800, imageHeight: 400,
+        link: { mobileWebUrl: url, webUrl: url }
+      },
+      buttons: [{ title: '영수증 보기', link: { mobileWebUrl: url, webUrl: url } }]
+    });
+  } catch (e) {
+    const text = `[우리과 맛집 수첩] ${p.name}\n${desc}\n${url}`;
+    if (navigator.share) { try { await navigator.share({ title: p.name, text, url }); return; } catch (x) { if (x && x.name === 'AbortError') return; } }
+    try { await navigator.clipboard.writeText(text); toast('카카오톡을 열 수 없어서 링크를 복사했어요. 단톡방에 붙여넣어 주세요.'); }
+    catch (x) { toast('공유를 열 수 없어요. 주소창의 링크를 복사해 주세요.'); }
+  }
+}
+
 const DEMO_RESULTS = [
   { id: 'demo-p1', place_name: '골목 멸치국수 (예시)', category_name: '음식점 > 한식 > 국수', address_name: '경기 시흥시 장곡동 예시주소', road_address_name: '', x: '126.8064', y: '37.3832', phone: '', place_url: '' },
   { id: 'demo-s1', place_name: '시장 손칼국수 (예시)', category_name: '음식점 > 한식 > 국수', address_name: '경기 시흥시 신천동 예시주소', road_address_name: '', x: '126.8012', y: '37.3815', phone: '', place_url: '' },
@@ -651,7 +700,10 @@ function renderDetail(pid) {
   el.innerHTML = `
     <div class="top">
       <a class="icon-btn" href="#/" aria-label="뒤로">${ICON.back}</a>
-      ${canManage(p) ? `<div><a class="text-btn" style="display:inline-flex;align-items:center" href="#/edit/${encodeURIComponent(pid)}">수정</a><button class="text-btn danger" data-act="del-place" data-pid="${esc(pid)}">삭제</button></div>` : ''}
+      <div style="display:flex;align-items:center">
+        <button class="text-btn share-btn" data-act="share" data-pid="${esc(pid)}">${ICON.share}공유</button>
+        ${canManage(p) ? `<a class="text-btn" style="display:inline-flex;align-items:center" href="#/edit/${encodeURIComponent(pid)}">수정</a><button class="text-btn danger" data-act="del-place" data-pid="${esc(pid)}">삭제</button>` : ''}
+      </div>
     </div>
     <div class="receipt-wrap">
       <div class="zig-t" aria-hidden="true"></div>
@@ -900,6 +952,7 @@ document.addEventListener('click', async (e) => {
       case 'view': S.view = t.dataset.v; renderHome(); if (S.view === 'map') renderMap(); break;
       case 'tag': S.tag = S.tag === t.dataset.tag ? '전체' : t.dataset.tag; renderHome(); if (S.view === 'map') renderMap(); break;
       case 'rate': openRating(t.dataset.pid); break;
+      case 'share': await sharePlace(t.dataset.pid); break;
       case 'rs-score': S.rate.score = Number(t.dataset.score); $('#rs-stars').innerHTML = starButtons(S.rate.score, 'rs-score'); break;
       case 'rs-save': {
         if (!S.rate.score) { toast('별을 하나 이상 골라 주세요.'); return; }
@@ -977,7 +1030,8 @@ const ICON = {
   pin: sv('<path d="M12 21s-7-6.2-7-11.5a7 7 0 0 1 14 0C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/>'),
   doc: sv('<path d="M4 4h12l4 4v12H4z"/><path d="M8 11h8M8 15h6"/>'),
   map: sv('<path d="M9 4L3 6v14l6-2 6 2 6-2V4l-6 2-6-2zM9 4v14M15 6v14"/>'),
-  star: sv('<path d="M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1-4.4-4.3 6.1-.9z"/>', 20)
+  star: sv('<path d="M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1-4.4-4.3 6.1-.9z"/>', 20),
+  share: sv('<circle cx="18" cy="5" r="2.5"/><circle cx="6" cy="12" r="2.5"/><circle cx="18" cy="19" r="2.5"/><path d="M8.2 10.8l7.6-4.4M8.2 13.2l7.6 4.4"/>', 17)
 };
 
 /* ---------- 시작 ---------- */

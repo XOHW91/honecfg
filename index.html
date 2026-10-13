@@ -4,6 +4,14 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>우리과 맛집 수첩</title>
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#8f5d34">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="맛집수첩">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nanum+Pen+Script&family=Gowun+Dodum&family=Nanum+Gothic+Coding:wght@400;700&display=swap">
 <style>
@@ -198,6 +206,46 @@ a { color: inherit; text-decoration: none; }
 .stamp-fx div { width: 150px; height: 150px; border: 6px solid var(--accent); border-radius: 50%; color: var(--accent); display: flex; flex-direction: column; align-items: center; justify-content: center; font-family: var(--f-hand); font-size: 44px; line-height: 1; background: rgba(255,253,247,.9); animation: slam .9s ease-out forwards; }
 @keyframes slam { 0% { transform: scale(2.2) rotate(-4deg); opacity: 0; } 30% { transform: scale(.95) rotate(-14deg); opacity: 1; } 40% { transform: scale(1) rotate(-14deg); } 80% { opacity: 1; } 100% { transform: scale(1) rotate(-14deg); opacity: 0; } }
 @media (prefers-reduced-motion: reduce) { .stamp-fx div { animation: none; opacity: 0; } }
+/* ---------- 사진 ---------- */
+.photos { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; margin-top: 14px; }
+.photos button { padding: 6px 6px 18px; border: none; background: #fff; box-shadow: 0 2px 5px var(--shadow); aspect-ratio: 4 / 5; max-width: 100%; }
+.photos button:nth-child(odd) { transform: rotate(-2deg); }
+.photos button:nth-child(even) { transform: rotate(2deg); }
+.photos img { width: 100%; height: 100%; object-fit: cover; display: block; background: var(--paper-line); }
+.photos .ph-load { grid-column: 1 / -1; font-family: var(--f-body); font-size: 13px; color: var(--ink-soft); }
+.photo-edit { display: flex; flex-wrap: wrap; gap: 10px; }
+.photo-edit .thumb { position: relative; width: 88px; height: 88px; border-radius: 10px; overflow: hidden; box-shadow: 0 2px 5px var(--shadow); background: var(--paper-line); }
+.photo-edit .thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.photo-edit .thumb button { position: absolute; top: 4px; right: 4px; width: 30px; height: 30px; border: none; border-radius: 15px; background: rgba(43,38,32,.75); color: var(--accent-ink); display: flex; align-items: center; justify-content: center; padding: 0; }
+.photo-add { width: 88px; height: 88px; border: 1.5px dashed var(--ink); border-radius: 10px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; font-size: 12px; color: var(--ink-soft); cursor: pointer; background: var(--receipt); }
+.photo-add input { position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none; }
+.photo-add:focus-within { outline: 2.5px solid var(--accent); outline-offset: 2px; }
+.lightbox { position: fixed; inset: 0; z-index: 80; background: rgba(20,17,14,.92); display: flex; align-items: center; justify-content: center; padding: calc(56px + env(safe-area-inset-top, 0px)) 12px calc(56px + env(safe-area-inset-bottom, 0px)); }
+.lightbox img { max-width: 100%; max-height: 100%; object-fit: contain; border: 6px solid #fff; }
+.lightbox .lb-close { position: absolute; top: calc(10px + env(safe-area-inset-top, 0px)); right: 10px; color: #fff; }
+.lightbox .lb-nav { position: absolute; bottom: calc(12px + env(safe-area-inset-bottom, 0px)); left: 0; right: 0; display: flex; justify-content: center; align-items: center; gap: 18px; color: #fff; font-family: var(--f-mono); font-size: 14px; }
+.lightbox .lb-nav button { color: #fff; }
+.badge-cam { display: inline-flex; align-items: center; gap: 3px; }
+
+/* ---------- 내 기록 ---------- */
+.me-head { display: flex; align-items: center; gap: 2px; padding: 14px 8px 0; }
+.me-head h1 { margin: 0; font-size: clamp(28px, 8.5vw, 36px); min-width: 0; overflow-wrap: anywhere; line-height: 1.1; }
+.me-sub { margin: 0; padding: 0 16px 0 54px; font-size: 13px; color: var(--ink-soft); }
+.me-tabs { display: flex; margin: 16px 16px 0 52px; border: 1.5px solid var(--ink); border-radius: 10px; overflow: hidden; background: var(--receipt); }
+.me-tabs button { flex: 1; min-height: 42px; border: none; background: transparent; font-size: 14px; }
+.me-tabs button[aria-pressed="true"] { background: var(--ink); color: var(--accent-ink); }
+.my-rate { display: block; background: var(--receipt); padding: 14px 16px; box-shadow: 0 3px 8px var(--shadow); }
+.my-rate .t { display: flex; justify-content: space-between; gap: 10px; font-family: var(--f-mono); }
+.my-rate .t strong { min-width: 0; overflow-wrap: anywhere; }
+.my-rate .t span { color: var(--accent); font-weight: 700; white-space: nowrap; }
+.my-rate p { margin: 6px 0 0; font-size: 14px; color: var(--ink-soft); line-height: 1.5; overflow-wrap: anywhere; }
+
+/* ---------- 설치 안내 ---------- */
+.install-strip { margin: 12px 16px 0 52px; padding: 10px 8px 10px 14px; background: var(--receipt); border: 1.5px dashed var(--cover); border-radius: 12px; display: flex; align-items: center; gap: 8px; font-size: 13px; line-height: 1.45; }
+.install-strip span { flex: 1; min-width: 0; }
+.install-strip .go { flex: none; min-height: 36px; padding: 0 12px; border: none; border-radius: 18px; background: var(--cover); color: var(--accent-ink); font-size: 13px; }
+.install-strip .x { flex: none; width: 36px; height: 36px; border: none; background: transparent; display: flex; align-items: center; justify-content: center; padding: 0; }
+.steps { margin: 0; padding-left: 20px; font-size: 14px; line-height: 1.8; }
 .loading { min-height: 100vh; display: flex; align-items: center; justify-content: center; font-family: var(--f-hand); font-size: 30px; color: var(--ink-soft); }
 </style>
 </head>
@@ -237,10 +285,20 @@ a { color: inherit; text-decoration: none; }
         <h1 class="hand">우리과 맛집 수첩</h1>
         <p id="home-sub"></p>
       </div>
+      <div style="display:flex;flex:none">
+      <a class="icon-btn" href="#/me" aria-label="내 기록">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="3.5"/><path d="M5 20c.8-3.6 3.6-5.5 7-5.5s6.2 1.9 7 5.5"/></svg>
+      </a>
       <button class="icon-btn" data-act="settings" aria-label="설정">
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M4.9 19.1L7 17M17 7l2.1-2.1"/></svg>
       </button>
+      </div>
     </header>
+    <div class="install-strip" id="install-strip" hidden>
+      <span>홈 화면에 추가하면 앱처럼 바로 열 수 있어요</span>
+      <button class="go" data-act="install">추가하기</button>
+      <button class="x" data-act="install-dismiss" aria-label="안내 닫기"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+    </div>
     <div class="seg" role="group" aria-label="보기 방식">
       <button data-act="view" data-v="list" aria-pressed="true">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>리스트</button>
@@ -268,7 +326,9 @@ a { color: inherit; text-decoration: none; }
 
   <section class="paper" id="v-detail" hidden></section>
   <section class="paper" id="v-form" hidden></section>
+  <section class="paper margin" id="v-me" hidden></section>
 </div>
+<div class="lightbox" id="lightbox" hidden role="dialog" aria-modal="true" aria-label="사진 크게 보기"></div>
 
 <div class="backdrop" id="backdrop" hidden data-act="sheet-close"></div>
 <div class="sheet" id="sheet" role="dialog" aria-modal="true" hidden></div>
@@ -376,6 +436,7 @@ async function makeFirebaseStore(cfg) {
       return () => { u1(); u2(); };
     },
     async exists(pid) { return (await get(ref(db, `places/${pid}`))).exists(); },
+    async getPhotos(pid) { return (await get(ref(db, `photos/${pid}`))).val() || {}; },
     async write(updates) { await update(ref(db), updates); }
   };
 }
@@ -424,7 +485,14 @@ function makeDemoStore() {
     async changeJoinCode(newCode, nick) { db.secret.joinCode = newCode; db.members[uid] = { nick, code: newCode, joinedAt: Date.now() }; save(); },
     subscribe(onData) { listener = onData; setTimeout(() => onData(db.places || {}, db.ratings || {}), 0); return () => { listener = null; }; },
     async exists(pid) { return !!(db.places && db.places[pid]); },
-    async write(updates) { Object.entries(updates).forEach(([p, v]) => setPath(p, v)); save(); }
+    async getPhotos(pid) { return JSON.parse(JSON.stringify((db.photos && db.photos[pid]) || {})); },
+    async write(updates) {
+      const before = JSON.stringify(db);
+      Object.entries(updates).forEach(([p, v]) => setPath(p, v));
+      try { localStorage.setItem(KEY, JSON.stringify(db)); }
+      catch (e) { db = JSON.parse(before); throw new Error('DEMO_FULL'); }
+      if (listener) setTimeout(() => listener(db.places || {}, db.ratings || {}), 0);
+    }
   };
 }
 
@@ -535,15 +603,16 @@ const origin = () => S.myPos || CONFIG.center;
 
 /* ---------- 화면 전환 ---------- */
 function show(id) {
-  ['v-loading', 'v-entry', 'v-home', 'v-detail', 'v-form'].forEach((v) => { $('#' + v).hidden = v !== id; });
+  ['v-loading', 'v-entry', 'v-home', 'v-detail', 'v-form', 'v-me'].forEach((v) => { $('#' + v).hidden = v !== id; });
   window.scrollTo(0, 0);
 }
 function route() {
-  closeSheet();
+  closeSheet(); closeLightbox();
   if (!S.joined) { show('v-entry'); return; }
   const h = location.hash;
   let m;
   if ((m = h.match(/^#\/p\/(.+)$/))) { renderDetail(decodeURIComponent(m[1])); show('v-detail'); }
+  else if (h === '#/me') { renderMe(); show('v-me'); }
   else if (h === '#/new') { S.form = newForm(); renderForm(); show('v-form'); setTimeout(() => $('#q') && $('#q').focus(), 50); }
   else if ((m = h.match(/^#\/edit\/(.+)$/))) {
     const pid = decodeURIComponent(m[1]); const p = S.places[pid];
@@ -593,6 +662,7 @@ function refresh() {
   if (!S.joined) return;
   const h = location.hash; const m = h.match(/^#\/p\/(.+)$/);
   if (m) renderDetail(decodeURIComponent(m[1]));
+  else if (h === '#/me') renderMe();
   else if (h === '#/' || h === '' || h === '#') { renderHome(); if (S.view === 'map') renderMap(); }
   else if (h === '#/new' && S.form && S.form.results) renderResults();
 }
@@ -626,21 +696,60 @@ function renderHome() {
     $('#list').innerHTML = `<div class="empty"><span class="hand">${none ? '아직 빈 수첩이에요' : '이 태그엔 아직 없어요'}</span>${none ? '오른쪽 아래 <b>맛집 붙이기</b>로 첫 장을 붙여 보세요.' : '다른 태그를 골라 보거나 새로 붙여 보세요.'}</div>`;
     return;
   }
+  $('#list').innerHTML = arr.map((x, i) => cardHtml(x, i, S.sort === 'distance')).join('');
+  updateInstallStrip();
+}
+function cardHtml({ pid, p, st, km }, i, showDist) {
   const rots = [-1.2, 1, -0.6, 0.8];
   const tapePos = ['left:50%;margin-left:-34px;transform:rotate(3deg)', 'left:18px;transform:rotate(-6deg)', 'right:22px;transform:rotate(5deg)'];
-  $('#list').innerHTML = arr.map(({ pid, p, st, km }, i) => {
-    const right = st.avgAll != null ? `<span class="score">★ ${st.avgAll.toFixed(1)}</span>` : `<span class="wish">${p.status === 'wish' ? '가보고 싶어요' : '별점 없음'}</span>`;
-    const meta = [`추천 ${esc(p.authorNick)}`, ...tagsOf(p).map(esc), st.all.length ? `별점 ${st.all.length}명` : '', S.sort === 'distance' ? fmtDist(km) : ''].filter(Boolean).join(' · ');
-    return `<a class="card" href="#/p/${encodeURIComponent(pid)}" style="transform:rotate(${rots[i % 4]}deg)">
-      <span class="tape" style="${tapePos[i % 3]};background:${TAPES[i % 3]}" aria-hidden="true"></span>
-      <div class="slip">
-        <div class="slip-top"><strong>${esc(p.name)}</strong>${right}</div>
-        <div class="slip-meta">${meta}</div>
-        ${p.note ? `<hr class="dash"><p class="slip-note">"${esc(p.note)}"</p>` : ''}
-      </div>
-      <div class="zig-b" aria-hidden="true"></div>
-    </a>`;
-  }).join('');
+  const right = st.avgAll != null ? `<span class="score">★ ${st.avgAll.toFixed(1)}</span>` : `<span class="wish">${p.status === 'wish' ? '가보고 싶어요' : '별점 없음'}</span>`;
+  const meta = [`추천 ${esc(p.authorNick)}`, ...tagsOf(p).map(esc), st.all.length ? `별점 ${st.all.length}명` : '', p.photoCount ? `사진 ${Number(p.photoCount)}` : '', showDist ? fmtDist(km) : ''].filter(Boolean).join(' · ');
+  return `<a class="card" href="#/p/${encodeURIComponent(pid)}" style="transform:rotate(${rots[i % 4]}deg)">
+    <span class="tape" style="${tapePos[i % 3]};background:${TAPES[i % 3]}" aria-hidden="true"></span>
+    <div class="slip">
+      <div class="slip-top"><strong>${esc(p.name)}</strong>${right}</div>
+      <div class="slip-meta">${meta}</div>
+      ${p.note ? `<hr class="dash"><p class="slip-note">"${esc(p.note)}"</p>` : ''}
+    </div>
+    <div class="zig-b" aria-hidden="true"></div>
+  </a>`;
+}
+
+/* ---------- 내 기록 ---------- */
+function renderMe() {
+  const el = $('#v-me');
+  const tab = S.meTab || 'posts';
+  const mine = Object.entries(S.places).filter(([, p]) => p.authorUid === S.uid)
+    .map(([pid, p]) => ({ pid, p, st: stats(pid), km: distKm(origin(), p) }))
+    .sort((a, b) => (b.p.createdAt || 0) - (a.p.createdAt || 0));
+  const rated = Object.entries(S.ratings)
+    .filter(([pid, rs]) => rs && rs[S.uid] && S.places[pid] && S.places[pid].authorUid !== S.uid)
+    .map(([pid, rs]) => ({ pid, p: S.places[pid], r: rs[S.uid] }))
+    .sort((a, b) => (b.r.updatedAt || 0) - (a.r.updatedAt || 0));
+  let body;
+  if (!S.ready) body = '<div class="empty"><span class="hand">불러오는 중…</span></div>';
+  else if (tab === 'posts') {
+    body = mine.length ? `<div class="list">${mine.map((x, i) => cardHtml(x, i, false)).join('')}</div>`
+      : '<div class="empty"><span class="hand">아직 붙인 맛집이 없어요</span>홈의 <b>맛집 붙이기</b>로 첫 영수증을 남겨 보세요.</div>';
+  } else {
+    body = rated.length ? `<div class="list" style="gap:16px">${rated.map(({ pid, p, r }) => `
+      <a class="my-rate" href="#/p/${encodeURIComponent(pid)}">
+        <div class="t"><strong>${esc(p.name)}</strong><span>★ ${Number(r.score)}</span></div>
+        <p>${r.comment ? esc(r.comment) : '한마디 없이 별점만 남겼어요'} · ${fmtDate(r.updatedAt).slice(0, 10)}</p>
+      </a>`).join('')}</div>`
+      : '<div class="empty"><span class="hand">아직 찍은 도장이 없어요</span>동료가 붙인 맛집에 별점을 남겨 보세요.</div>';
+  }
+  el.innerHTML = `
+    <header class="me-head">
+      <a class="icon-btn" href="#/" aria-label="뒤로">${ICON.back}</a>
+      <h1 class="hand">${esc(S.nick)} 님의 기록</h1>
+    </header>
+    <p class="me-sub">이 기기에서 쓴 글만 모아 보여줘요</p>
+    <div class="me-tabs" role="group" aria-label="기록 종류">
+      <button data-act="me-tab" data-v="posts" aria-pressed="${tab === 'posts'}">내가 붙인 맛집 ${mine.length}</button>
+      <button data-act="me-tab" data-v="rated" aria-pressed="${tab === 'rated'}">내가 찍은 도장 ${rated.length}</button>
+    </div>
+    <div style="padding-top:8px">${body}</div>`;
 }
 async function renderMap() {
   const ph = $('#map-ph');
@@ -722,6 +831,7 @@ function renderDetail(pid) {
           <div class="row"><span>거리</span><span>${fmtDist(distKm(origin(), p))}</span></div>
         </div>
         ${p.note ? `<p class="quote">"${esc(p.note)}"</p>` : ''}
+        ${photosHtml(pid, p)}
         <hr class="dash" style="margin:14px 0 12px">
         <div class="rows">
           <div class="row"><span>등록자 평점</span><span>${st.author ? '★ ' + Number(st.author.score).toFixed(1) : '-'}</span></div>
@@ -744,6 +854,78 @@ function renderDetail(pid) {
     </div>
     <div class="bottom-bar"><button class="btn-accent" data-act="rate" data-pid="${esc(pid)}">${ICON.star}${btnLabel}</button></div>`;
 }
+
+/* ---------- 사진 ---------- */
+const MAX_PHOTOS = 3;
+S.photoCache = {};
+function photoList(obj) {
+  return Object.entries(obj || {}).map(([id, v]) => ({ id, data: v.data, createdAt: v.createdAt || 0 }))
+    .filter((x) => typeof x.data === 'string' && x.data.startsWith('data:image/jpeg;base64,'))
+    .sort((a, b) => a.createdAt - b.createdAt);
+}
+async function loadPhotos(pid, ver) {
+  const c = S.photoCache[pid];
+  if (c && c.ver === ver && c.status !== 'error') return c.status === 'ok' ? c.items : c.promise;
+  const promise = S.store.getPhotos(pid).then((obj) => {
+    S.photoCache[pid] = { ver, status: 'ok', items: photoList(obj) };
+    return S.photoCache[pid].items;
+  }).catch((e) => { S.photoCache[pid] = { ver, status: 'error' }; throw e; });
+  S.photoCache[pid] = { ver, status: 'loading', promise };
+  return promise;
+}
+function photosHtml(pid, p) {
+  const n = Number(p.photoCount) || 0;
+  if (!n) return '';
+  const ver = p.updatedAt || p.createdAt || 0;
+  const c = S.photoCache[pid];
+  if (!c || c.ver !== ver) {
+    loadPhotos(pid, ver).then(() => { if (location.hash === '#/p/' + encodeURIComponent(pid)) renderDetail(pid); }).catch(() => {});
+    return `<div class="photos"><span class="ph-load">사진 ${n}장 불러오는 중…</span></div>`;
+  }
+  if (c.status === 'loading') return `<div class="photos"><span class="ph-load">사진 ${n}장 불러오는 중…</span></div>`;
+  if (c.status === 'error') return '<div class="photos"><span class="ph-load">사진을 불러오지 못했어요. 새로고침해 주세요.</span></div>';
+  return `<div class="photos">${c.items.map((x, i) => `<button type="button" data-act="lightbox" data-pid="${esc(pid)}" data-i="${i}" aria-label="사진 ${i + 1} 크게 보기"><img src="${x.data}" alt="${esc(p.name)} 사진 ${i + 1}" loading="lazy"></button>`).join('')}</div>`;
+}
+function openLightbox(pid, i) {
+  const c = S.photoCache[pid]; if (!c || c.status !== 'ok' || !c.items.length) return;
+  S.lb = { pid, i: Math.max(0, Math.min(i, c.items.length - 1)) };
+  renderLightbox();
+}
+function renderLightbox() {
+  const c = S.photoCache[S.lb.pid]; const n = c.items.length; const i = S.lb.i;
+  const lb = $('#lightbox');
+  lb.innerHTML = `<img src="${c.items[i].data}" alt="사진 ${i + 1} / ${n}">
+    <button class="icon-btn lb-close" data-act="lb-close" aria-label="닫기">${ICON.close}</button>
+    ${n > 1 ? `<div class="lb-nav"><button class="icon-btn" data-act="lb-move" data-d="-1" aria-label="이전 사진">${ICON.back}</button><span>${i + 1} / ${n}</span><button class="icon-btn" data-act="lb-move" data-d="1" aria-label="다음 사진" style="transform:scaleX(-1)">${ICON.back}</button></div>` : ''}`;
+  lb.hidden = false;
+}
+function closeLightbox() { const lb = $('#lightbox'); if (lb) { lb.hidden = true; lb.innerHTML = ''; } S.lb = null; }
+
+/* 사진을 긴 변 1080px JPEG로 줄여서 300KB 안쪽으로 맞춘다 */
+function loadImage(file) {
+  return new Promise((resolve, reject) => {
+    const url = URL.createObjectURL(file); const img = new Image();
+    img.onload = () => { URL.revokeObjectURL(url); resolve(img); };
+    img.onerror = () => { URL.revokeObjectURL(url); reject(new Error('BAD_IMAGE')); };
+    img.src = url;
+  });
+}
+async function compressPhoto(file) {
+  const img = await loadImage(file);
+  const LIMIT = 300000;
+  for (const side of [1080, 860, 680]) {
+    const scale = Math.min(1, side / Math.max(img.naturalWidth, img.naturalHeight));
+    const w = Math.max(1, Math.round(img.naturalWidth * scale)), h = Math.max(1, Math.round(img.naturalHeight * scale));
+    const cv = document.createElement('canvas'); cv.width = w; cv.height = h;
+    const ctx = cv.getContext('2d'); ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, w, h); ctx.drawImage(img, 0, 0, w, h);
+    for (const q of [0.72, 0.6, 0.5]) {
+      const data = cv.toDataURL('image/jpeg', q);
+      if (data.length <= LIMIT) return data;
+    }
+  }
+  throw new Error('TOO_BIG');
+}
+const newId = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
 
 /* ---------- 별점 시트 ---------- */
 function openRating(pid) {
@@ -801,6 +983,10 @@ function openSettings() {
         <p class="note">관리자는 모든 글을 수정·삭제하고 그룹 코드를 바꿀 수 있어요.</p>`}
     </div>
     <div class="group">
+      <span style="font-size:13px;color:var(--ink-soft)">홈 화면에 추가</span>
+      ${installGuideHtml()}
+    </div>
+    <div class="group">
       <button class="btn-line" data-act="st-leave">이 기기에서 나가기</button>
     </div>`);
 }
@@ -818,10 +1004,40 @@ function openSheet(html) {
 function closeSheet() { $('#sheet').hidden = true; $('#backdrop').hidden = true; S.onConfirm = null; }
 
 /* ---------- 등록 / 수정 ---------- */
-function newForm() { return { pid: null, place: null, results: null, query: '', tags: new Set(), menu: '', note: '', status: 'visited', score: 0, edit: false }; }
+function newForm() { return { pid: null, place: null, results: null, query: '', tags: new Set(), menu: '', note: '', status: 'visited', score: 0, edit: false, photos: [], removed: new Set(), photosLoading: false }; }
 function editForm(pid, p) {
   const mine = (S.ratings[pid] || {})[S.uid];
-  return { pid, place: { id: pid, name: p.name, address: p.address, category: p.category }, results: null, query: '', tags: new Set(tagsOf(p)), menu: p.menu || '', note: p.note || '', status: p.status, score: mine ? Number(mine.score) : 0, edit: true, isAuthor: p.authorUid === S.uid };
+  const f = { pid, place: { id: pid, name: p.name, address: p.address, category: p.category }, results: null, query: '', tags: new Set(tagsOf(p)), menu: p.menu || '', note: p.note || '', status: p.status, score: mine ? Number(mine.score) : 0, edit: true, isAuthor: p.authorUid === S.uid, photos: [], removed: new Set(), photosLoading: false };
+  if (Number(p.photoCount) > 0) {
+    f.photosLoading = true;
+    loadPhotos(pid, p.updatedAt || p.createdAt || 0).then((items) => {
+      if (S.form !== f) return;
+      f.photos = items.map((x) => ({ id: x.id, data: x.data, isNew: false })); f.photosLoading = false; renderFormPhotos();
+    }).catch(() => { if (S.form !== f) return; f.photosLoading = false; f.photosError = true; renderFormPhotos(); });
+  }
+  return f;
+}
+function renderFormPhotos() {
+  const box = $('#f-photos'); const f = S.form; if (!box || !f) return;
+  if (f.photosLoading) { box.innerHTML = '<p class="muted" style="font-size:13px;margin:0">사진 불러오는 중…</p>'; return; }
+  if (f.photosError) { box.innerHTML = '<p class="muted" style="font-size:13px;margin:0">기존 사진을 불러오지 못했어요. 새로고침 후 다시 열어 주세요.</p>'; return; }
+  const thumbs = f.photos.map((x, i) => `<div class="thumb"><img src="${x.data}" alt="첨부 사진 ${i + 1}"><button type="button" data-act="fphoto-del" data-i="${i}" aria-label="사진 ${i + 1} 빼기">${ICON.closeSm}</button></div>`).join('');
+  const add = f.photos.length < MAX_PHOTOS ? `<label class="photo-add">${ICON.camera}<span>${f.busy ? '줄이는 중…' : '사진 추가'}</span><input type="file" id="f-photo-input" accept="image/*" multiple ${f.busy ? 'disabled' : ''}></label>` : '';
+  box.innerHTML = `<div class="photo-edit">${thumbs}${add}</div>`;
+  const inp = $('#f-photo-input');
+  if (inp) inp.addEventListener('change', async () => {
+    const files = [...inp.files].slice(0, MAX_PHOTOS - f.photos.length);
+    if (!files.length) return;
+    f.busy = true; renderFormPhotos();
+    let failed = 0;
+    for (const file of files) {
+      try { f.photos.push({ id: newId(), data: await compressPhoto(file), isNew: true }); }
+      catch (e) { failed++; }
+    }
+    f.busy = false; renderFormPhotos();
+    if (failed) toast(`${failed}장은 열 수 없는 사진이라 뺐어요.`);
+    if (inp.files.length > files.length) toast(`사진은 ${MAX_PHOTOS}장까지 붙일 수 있어요.`);
+  });
 }
 function renderForm() {
   const f = S.form; const el = $('#v-form');
@@ -863,8 +1079,12 @@ function renderForm() {
         <textarea class="box-input" id="f-note" rows="2" maxlength="100" placeholder="동료들에게 한마디">${esc(f.note)}</textarea>
         <div class="counter" id="f-count">${f.note.length}/100</div>
       </section>
+      <section class="sec">
+        <span class="lbl">${f.edit ? '' : '6. '}사진 (최대 ${MAX_PHOTOS}장, 선택)</span>
+        <div id="f-photos"></div>
+      </section>
       ${showScore ? `<section class="sec">
-        <span class="lbl">${f.edit ? '' : '6. '}내 별점</span>
+        <span class="lbl">${f.edit ? '' : '7. '}내 별점</span>
         <div class="stars" id="f-stars" role="group" aria-label="별점 선택">${starButtons(f.score, 'fscore')}</div>
       </section>` : ''}
     </div>
@@ -873,6 +1093,7 @@ function renderForm() {
     renderResults();
     $('#search-form').addEventListener('submit', (e) => { e.preventDefault(); doSearch(); });
   }
+  renderFormPhotos();
   const note = $('#f-note');
   note.addEventListener('input', () => { S.form.note = note.value; $('#f-count').textContent = `${note.value.length}/100`; });
   $('#f-menu').addEventListener('input', (e) => { S.form.menu = e.target.value; });
@@ -915,13 +1136,21 @@ async function save() {
   f.menu = $('#f-menu').value.trim(); f.note = $('#f-note').value.trim();
   const needScore = f.status === 'visited' && (!f.edit || f.isAuthor);
   if (needScore && !f.score) { toast('별점을 골라 주세요. 아직 안 가봤다면 "가보고 싶어요"를 눌러 주세요.'); return; }
+  if (f.busy) { toast('사진을 줄이는 중이에요. 잠시만 기다려 주세요.'); return; }
+  if (f.photosLoading) { toast('기존 사진을 불러오는 중이에요. 잠시만 기다려 주세요.'); return; }
   const btn = $('#save-btn'); btn.disabled = true;
   const now = Date.now();
   const tags = f.tags.size ? Object.fromEntries([...f.tags].map((t) => [t, true])) : null;
+  const photoUpdates = (pid) => {
+    const up = {};
+    f.photos.filter((x) => x.isNew).forEach((x, i) => { up[`photos/${pid}/${x.id}`] = { data: x.data, uid: S.uid, createdAt: now + i }; });
+    f.removed.forEach((id) => { up[`photos/${pid}/${id}`] = null; });
+    return up;
+  };
   try {
     if (f.edit) {
       const base = `places/${f.pid}/`;
-      const up = { [base + 'menu']: f.menu, [base + 'note']: f.note, [base + 'status']: f.status, [base + 'tags']: tags, [base + 'updatedAt']: now };
+      const up = { [base + 'menu']: f.menu, [base + 'note']: f.note, [base + 'status']: f.status, [base + 'tags']: tags, [base + 'updatedAt']: now, [base + 'photoCount']: f.photosError ? (Number((S.places[f.pid] || {}).photoCount) || 0) : f.photos.length, ...photoUpdates(f.pid) };
       if (needScore) up[`ratings/${f.pid}/${S.uid}`] = { score: f.score, nick: S.nick, updatedAt: now };
       await S.store.write(up);
       toast('영수증을 고쳤어요.'); location.hash = '#/p/' + encodeURIComponent(f.pid);
@@ -932,13 +1161,16 @@ async function save() {
       if (f.place.phone) place.phone = f.place.phone;
       if (f.place.kakaoUrl) place.kakaoUrl = f.place.kakaoUrl;
       if (tags) place.tags = tags;
-      const up = { [`places/${pid}`]: place };
+      if (f.photos.length) place.photoCount = f.photos.length;
+      const up = { [`places/${pid}`]: place, ...photoUpdates(pid) };
       if (needScore) up[`ratings/${pid}/${S.uid}`] = { score: f.score, nick: S.nick, updatedAt: now };
       await S.store.write(up);
       toast('수첩에 붙였어요.'); location.hash = '#/p/' + encodeURIComponent(pid);
     }
   } catch (e) {
-    toast(isDenied(e) ? '저장 권한이 없어요. 그룹 코드가 바뀌었는지 확인해 주세요.' : '저장이 안 됐어요. 잠시 후 다시 시도해 주세요.');
+    toast(isDenied(e) ? '저장 권한이 없어요. 그룹 코드가 바뀌었거나 보안 규칙이 예전 버전일 수 있어요.'
+      : e && e.message === 'DEMO_FULL' ? '체험 모드 저장 공간이 꽉 찼어요. 사진을 줄여 주세요.'
+      : '저장이 안 됐어요. 잠시 후 다시 시도해 주세요.');
   } finally { btn.disabled = false; }
 }
 
@@ -970,7 +1202,8 @@ document.addEventListener('click', async (e) => {
       case 'del-place': {
         const pid = t.dataset.pid; const p = S.places[pid];
         confirmSheet('영수증 떼기', `"${p ? p.name : ''}"을(를) 삭제할까요? 달린 별점과 한마디도 함께 지워져요.`, '삭제', async () => {
-          await S.store.write({ [`places/${pid}`]: null, [`ratings/${pid}`]: null });
+          await S.store.write({ [`places/${pid}`]: null, [`ratings/${pid}`]: null, [`photos/${pid}`]: null });
+          delete S.photoCache[pid];
           location.hash = '#/'; toast('삭제했어요.');
         });
         break;
@@ -986,6 +1219,20 @@ document.addEventListener('click', async (e) => {
       case 'fstatus': S.form.menu = $('#f-menu').value; S.form.note = $('#f-note').value; S.form.status = t.dataset.v; renderFormKeep(); break;
       case 'fscore': S.form.score = Number(t.dataset.score); $('#f-stars').innerHTML = starButtons(S.form.score, 'fscore'); break;
       case 'save': await save(); break;
+      case 'fphoto-del': {
+        const f = S.form; const x = f.photos[Number(t.dataset.i)]; if (!x) return;
+        f.photos.splice(Number(t.dataset.i), 1); if (!x.isNew) f.removed.add(x.id);
+        renderFormPhotos(); break;
+      }
+      case 'lightbox': openLightbox(t.dataset.pid, Number(t.dataset.i)); break;
+      case 'lb-close': closeLightbox(); break;
+      case 'lb-move': {
+        const n = S.photoCache[S.lb.pid].items.length;
+        S.lb.i = (S.lb.i + Number(t.dataset.d) + n) % n; renderLightbox(); break;
+      }
+      case 'me-tab': S.meTab = t.dataset.v; renderMe(); break;
+      case 'install': await doInstall(); break;
+      case 'install-dismiss': ls.set('matjip_install_dismissed', true); updateInstallStrip(); break;
       case 'st-nick': {
         const v = $('#st-nick').value.trim();
         if (!v || v.length > 12) { toast('닉네임은 1~12자로 입력해 주세요.'); return; }
@@ -1018,7 +1265,41 @@ document.addEventListener('click', async (e) => {
   }
 });
 function renderFormKeep() { const y = window.scrollY; renderForm(); window.scrollTo(0, y); }
-document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !$('#sheet').hidden) closeSheet(); });
+document.addEventListener('keydown', (e) => {
+  if (e.key !== 'Escape') return;
+  if (!$('#lightbox').hidden) closeLightbox(); else if (!$('#sheet').hidden) closeSheet();
+});
+$('#lightbox').addEventListener('click', (e) => { if (e.target.id === 'lightbox') closeLightbox(); });
+
+/* ---------- 홈 화면에 추가 (PWA) ---------- */
+let installEvt = null;
+const isStandalone = () => window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+const isIOS = () => /iphone|ipad|ipod/i.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+window.addEventListener('beforeinstallprompt', (e) => { e.preventDefault(); installEvt = e; updateInstallStrip(); });
+window.addEventListener('appinstalled', () => { installEvt = null; updateInstallStrip(); toast('홈 화면에 추가했어요.'); });
+function updateInstallStrip() {
+  const strip = $('#install-strip'); if (!strip) return;
+  strip.hidden = isStandalone() || !!ls.get('matjip_install_dismissed') || !(installEvt || isIOS());
+}
+function installGuideHtml() {
+  if (isStandalone()) return '<p class="note">지금 홈 화면 앱으로 실행 중이에요.</p>';
+  if (installEvt) return '<button class="btn-line" data-act="install">홈 화면에 추가하기</button>';
+  if (isIOS()) return `<ol class="steps"><li>사파리 아래쪽 <b>공유</b> 버튼 누르기</li><li><b>홈 화면에 추가</b> 선택</li><li>오른쪽 위 <b>추가</b></li></ol>
+    <p class="note">아이폰은 홈 화면 앱과 사파리가 기록을 따로 보관해요. 앱으로 처음 열 때 그룹 코드를 한 번 더 입력해야 하고, 사파리에서 쓴 글은 앱에서 수정할 수 없어요. 설치한 뒤에는 앱으로만 쓰는 걸 추천해요.</p>`;
+  return '<p class="note">브라우저 메뉴(⋮)에서 <b>홈 화면에 추가</b> 또는 <b>앱 설치</b>를 눌러 주세요. 카카오톡 안에서 열었다면 먼저 크롬이나 삼성 인터넷으로 열어 주세요.</p>';
+}
+async function doInstall() {
+  if (installEvt) {
+    const evt = installEvt; installEvt = null;
+    evt.prompt();
+    try { await evt.userChoice; } catch (e) {}
+    updateInstallStrip(); return;
+  }
+  openSheet(`<h2 class="hand">홈 화면에 추가</h2><p class="sub">앱처럼 아이콘을 눌러 바로 열 수 있어요</p><div class="group">${installGuideHtml()}</div>`);
+}
+if ('serviceWorker' in navigator && location.protocol === 'https:') {
+  window.addEventListener('load', () => { navigator.serviceWorker.register('sw.js').catch(() => {}); });
+}
 
 /* ---------- 아이콘 ---------- */
 const sv = (d, w = 18) => `<svg width="${w}" height="${w}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${d}</svg>`;
@@ -1031,6 +1312,8 @@ const ICON = {
   doc: sv('<path d="M4 4h12l4 4v12H4z"/><path d="M8 11h8M8 15h6"/>'),
   map: sv('<path d="M9 4L3 6v14l6-2 6 2 6-2V4l-6 2-6-2zM9 4v14M15 6v14"/>'),
   star: sv('<path d="M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1-4.4-4.3 6.1-.9z"/>', 20),
+  closeSm: sv('<path d="M7 7l10 10M17 7L7 17"/>', 16),
+  camera: sv('<path d="M4 8h3l1.6-2.4h6.8L17 8h3v11H4z"/><circle cx="12" cy="13.2" r="3.3"/>', 24),
   share: sv('<circle cx="18" cy="5" r="2.5"/><circle cx="6" cy="12" r="2.5"/><circle cx="18" cy="19" r="2.5"/><path d="M8.2 10.8l7.6-4.4M8.2 13.2l7.6 4.4"/>', 17)
 };
 

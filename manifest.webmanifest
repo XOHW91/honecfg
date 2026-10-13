@@ -1,0 +1,17 @@
+{
+  "name": "우리과 맛집 수첩",
+  "short_name": "맛집수첩",
+  "description": "우리 부서끼리만 보는 점심 맛집 기록장",
+  "lang": "ko",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#f6efdf",
+  "theme_color": "#8f5d34",
+  "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
